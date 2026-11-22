@@ -1,0 +1,512 @@
+{
+  "name": "פניות תושבים",
+  "description": "מוקד המועצה: קליטת פניות מהתושבים, ניתוב למחלקות, מעקב זמני טיפול ועדכון התושב",
+  "entities": [
+    {
+      "key": "requests",
+      "label": "פנייה",
+      "plural": "פניות",
+      "titleField": "title",
+      "fields": [
+        {
+          "key": "title",
+          "label": "נושא הפנייה",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "category",
+          "label": "תחום",
+          "type": "select",
+          "options": [
+            "מים וביוב",
+            "תאורת רחוב",
+            "גינון ושטחים פתוחים",
+            "פסולת וניקיון",
+            "כבישים ומדרכות",
+            "בטיחות ומפגעים",
+            "חינוך",
+            "רווחה",
+            "ארנונה וגבייה",
+            "אחר"
+          ],
+          "required": true
+        },
+        {
+          "key": "community",
+          "label": "יישוב",
+          "type": "ref",
+          "ref": "communities"
+        },
+        {
+          "key": "residentName",
+          "label": "שם התושב",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "residentPhone",
+          "label": "טלפון",
+          "type": "text"
+        },
+        {
+          "key": "residentEmail",
+          "label": "דואר אלקטרוני (לעדכון על הטיפול)",
+          "type": "text"
+        },
+        {
+          "key": "channel",
+          "label": "ערוץ",
+          "type": "select",
+          "options": [
+            "מוקד טלפוני",
+            "טופס באתר",
+            "וואטסאפ",
+            "פנייה בכתב",
+            "בעל תפקיד ביישוב"
+          ]
+        },
+        {
+          "key": "address",
+          "label": "יישוב וכתובת",
+          "type": "text"
+        },
+        {
+          "key": "description",
+          "label": "פירוט",
+          "type": "longtext"
+        },
+        {
+          "key": "photo",
+          "label": "תמונה",
+          "type": "image"
+        },
+        {
+          "key": "location",
+          "label": "מיקום",
+          "type": "location"
+        },
+        {
+          "key": "urgency",
+          "label": "דחיפות",
+          "type": "select",
+          "options": [
+            "רגילה",
+            "דחופה",
+            "סכנה בטיחותית"
+          ]
+        },
+        {
+          "key": "department",
+          "label": "מחלקה מטפלת",
+          "type": "ref",
+          "ref": "departments"
+        },
+        {
+          "key": "assignee",
+          "label": "מטפל/ת",
+          "type": "user"
+        },
+        {
+          "key": "status",
+          "label": "סטטוס",
+          "type": "select",
+          "options": [
+            "חדשה",
+            "בטיפול",
+            "ממתינה לקבלן",
+            "טופלה",
+            "נסגרה"
+          ]
+        },
+        {
+          "key": "dueDate",
+          "label": "יעד לטיפול",
+          "type": "date"
+        },
+        {
+          "key": "overdue",
+          "label": "חרגה מהיעד",
+          "type": "boolean"
+        },
+        {
+          "key": "escalated",
+          "label": "הועברה להנהלה",
+          "type": "boolean"
+        },
+        {
+          "key": "resolution",
+          "label": "מה נעשה",
+          "type": "longtext"
+        },
+        {
+          "key": "closedOn",
+          "label": "תאריך סגירה",
+          "type": "date"
+        },
+        {
+          "key": "satisfaction",
+          "label": "שביעות רצון התושב (1-5)",
+          "type": "number"
+        }
+      ]
+    },
+    {
+      "key": "communities",
+      "label": "יישוב",
+      "plural": "יישובים",
+      "titleField": "name",
+      "fields": [
+        {
+          "key": "name",
+          "label": "שם היישוב",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "kind",
+          "label": "סוג",
+          "type": "select",
+          "options": [
+            "קיבוץ",
+            "מושב",
+            "כפר",
+            "יישוב קהילתי"
+          ]
+        },
+        {
+          "key": "contact",
+          "label": "רכז/ת היישוב",
+          "type": "text"
+        },
+        {
+          "key": "location",
+          "label": "מיקום",
+          "type": "location"
+        }
+      ]
+    },
+    {
+      "key": "departments",
+      "label": "מחלקה",
+      "plural": "מחלקות",
+      "titleField": "name",
+      "fields": [
+        {
+          "key": "name",
+          "label": "שם המחלקה",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "manager",
+          "label": "מנהל/ת המחלקה",
+          "type": "user"
+        },
+        {
+          "key": "categories",
+          "label": "תחומים שהמחלקה מטפלת בהם",
+          "type": "text"
+        }
+      ]
+    }
+  ],
+  "roles": [
+    {
+      "key": "moked",
+      "label": "מוקד"
+    },
+    {
+      "key": "staff",
+      "label": "עובד מחלקה"
+    },
+    {
+      "key": "deptManager",
+      "label": "מנהל מחלקה"
+    },
+    {
+      "key": "management",
+      "label": "הנהלת המועצה"
+    }
+  ],
+  "permissions": {
+    "requests": {
+      "moked": {
+        "read": "all",
+        "write": "all",
+        "delete": false
+      },
+      "staff": {
+        "read": "all",
+        "write": "all",
+        "delete": false
+      },
+      "deptManager": {
+        "read": "all",
+        "write": "all",
+        "delete": false
+      },
+      "management": {
+        "read": "all",
+        "write": "all",
+        "delete": true
+      }
+    },
+    "communities": {
+      "moked": {
+        "read": "all",
+        "write": "none"
+      },
+      "staff": {
+        "read": "all",
+        "write": "none"
+      },
+      "deptManager": {
+        "read": "all",
+        "write": "none"
+      },
+      "management": {
+        "read": "all",
+        "write": "all",
+        "delete": true
+      }
+    },
+    "departments": {
+      "moked": {
+        "read": "all",
+        "write": "none"
+      },
+      "staff": {
+        "read": "all",
+        "write": "none"
+      },
+      "deptManager": {
+        "read": "all",
+        "write": "none"
+      },
+      "management": {
+        "read": "all",
+        "write": "all",
+        "delete": true
+      }
+    }
+  },
+  "restrictedFields": [
+    {
+      "entity": "requests",
+      "field": "satisfaction",
+      "roles": [
+        "staff"
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "key": "slaDays",
+      "label": "ימים לטיפול בפנייה רגילה",
+      "description": "פנייה רגילה שלא טופלה עד אז מסומנת כחורגת ממנה",
+      "type": "number",
+      "default": 5,
+      "min": 1,
+      "max": 60
+    },
+    {
+      "key": "urgentDays",
+      "label": "ימים לטיפול בפנייה דחופה",
+      "description": "פנייה דחופה או בטיחותית",
+      "type": "number",
+      "default": 1,
+      "min": 0,
+      "max": 10
+    },
+    {
+      "key": "escalateAfter",
+      "label": "ימי חריגה עד העברה להנהלה",
+      "description": "פנייה שחרגה מהיעד במספר ימים כזה עוברת לתשומת לב הנהלת המועצה",
+      "type": "number",
+      "default": 3,
+      "min": 0,
+      "max": 30
+    }
+  ],
+  "workflow": {
+    "title": "מפנייה של תושב ועד סגירה",
+    "nodes": [
+      {
+        "id": "intake",
+        "label": "קליטה וניתוב למחלקה",
+        "kind": "step",
+        "owner": "מוקד / טופס באתר"
+      },
+      {
+        "id": "urgentCheck",
+        "label": "דחופה או סכנה בטיחותית?",
+        "kind": "decision",
+        "setting": "urgentDays"
+      },
+      {
+        "id": "alertManager",
+        "label": "התראה מיידית למנהל המחלקה",
+        "kind": "step",
+        "owner": "מנהל מחלקה"
+      },
+      {
+        "id": "handle",
+        "label": "טיפול בשטח",
+        "kind": "step",
+        "owner": "עובד מחלקה"
+      },
+      {
+        "id": "slaCheck",
+        "label": "חרגה מהיעד?",
+        "kind": "decision",
+        "setting": "escalateAfter"
+      },
+      {
+        "id": "escalate",
+        "label": "העברה להנהלה",
+        "kind": "step",
+        "owner": "הנהלת המועצה"
+      },
+      {
+        "id": "close",
+        "label": "סגירה ועדכון התושב",
+        "kind": "step",
+        "owner": "עובד מחלקה"
+      }
+    ],
+    "edges": [
+      {
+        "from": "intake",
+        "to": "urgentCheck"
+      },
+      {
+        "from": "urgentCheck",
+        "to": "alertManager",
+        "label": "כן"
+      },
+      {
+        "from": "urgentCheck",
+        "to": "handle",
+        "label": "לא"
+      },
+      {
+        "from": "alertManager",
+        "to": "handle"
+      },
+      {
+        "from": "handle",
+        "to": "slaCheck"
+      },
+      {
+        "from": "slaCheck",
+        "to": "escalate",
+        "label": "כן"
+      },
+      {
+        "from": "slaCheck",
+        "to": "close",
+        "label": "לא"
+      },
+      {
+        "from": "escalate",
+        "to": "close"
+      }
+    ]
+  },
+  "pages": [
+    {
+      "key": "requests",
+      "label": "פניות",
+      "icon": "file"
+    },
+    {
+      "key": "board",
+      "label": "לוח טיפול",
+      "icon": "board"
+    },
+    {
+      "key": "map",
+      "label": "מפת פניות",
+      "icon": "map"
+    },
+    {
+      "key": "overview",
+      "label": "תמונת מצב",
+      "icon": "chart",
+      "roles": [
+        "management",
+        "deptManager"
+      ]
+    },
+    {
+      "key": "communities",
+      "label": "יישובים",
+      "icon": "file",
+      "roles": [
+        "management",
+        "moked"
+      ]
+    },
+    {
+      "key": "departments",
+      "label": "מחלקות",
+      "icon": "users",
+      "roles": [
+        "management"
+      ]
+    }
+  ],
+  "guidedTest": [
+    {
+      "key": "routed",
+      "title": "פתחו פנייה בתחום תאורת רחוב, ובדקו שהיא נותבה למחלקת התחזוקה"
+    },
+    {
+      "key": "urgent",
+      "title": "פתחו פנייה עם סכנה בטיחותית, ובדקו שיעד הטיפול שלה הוא היום או מחר"
+    },
+    {
+      "key": "closed",
+      "title": "סגרו פנייה עם תיאור של מה שנעשה"
+    }
+  ],
+  "actions": [
+    {
+      "key": "closeRequest",
+      "title": "סגירת פנייה ועדכון התושב",
+      "description": "מסמן את הפנייה כטופלה, שומר מה נעשה, ושולח לתושב עדכון בדואר אם יש כתובת",
+      "input": {
+        "id": "מזהה הפנייה",
+        "resolution": "מה נעשה"
+      }
+    }
+  ],
+  "schedules": [
+    {
+      "key": "slaCheck",
+      "title": "בדיקת בוקר: פניות שחרגו מהיעד, התראה למנהלי המחלקות והעברה להנהלה",
+      "every": "day",
+      "at": "07:00"
+    }
+  ],
+  "publicForms": [
+    {
+      "key": "report",
+      "title": "פנייה למועצה",
+      "description": "נתקלתם במפגע, בתקלה או בבעיה ביישוב? כתבו לנו, ונעדכן אתכם כשהטיפול יסתיים.",
+      "entity": "requests",
+      "fields": [
+        "residentName",
+        "residentPhone",
+        "residentEmail",
+        "category",
+        "title",
+        "address",
+        "description"
+      ],
+      "submitLabel": "שליחת הפנייה",
+      "thanks": "תודה, הפנייה התקבלה במוקד המועצה. נעדכן אתכם בהמשך הטיפול."
+    }
+  ]
+}
