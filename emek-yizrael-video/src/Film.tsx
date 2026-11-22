@@ -2,6 +2,8 @@ import React from 'react';
 import { AbsoluteFill, Audio, Easing, Freeze, interpolate, OffthreadVideo, Sequence, spring, staticFile, useCurrentFrame, useVideoConfig } from 'remotion';
 import timeline from './timeline.json';
 
+// Burned-in subtitles cover the bottom of the screens (where the chat input is), so they are off; the .srt file goes alongside
+const SUBTITLES = false;
 const NAVY = '#161B4B';
 const GREEN = '#1F6E4A';
 const GOLD = '#D9A23A';
@@ -19,19 +21,19 @@ type Seg = { src: string; from: number; to: number; focus: Focus[] };
 const F = (t: number, x: number, y: number, s: number): Focus => ({ t, x, y, s });
 const S = (src: string, from: number, to: number, ...focus: Focus[]): Seg => ({ src, from, to, focus });
 const SCENES: Record<string, { segs: Seg[]; cap?: [string, string]; maxRate?: number }> = {
-  describe: { segs: [S('build', 0, 16.8, F(0, .5, .3, 1.15), F(2.5, .5, .8, 1.9), F(16.8, .5, .8, 1.9))], cap: ['אפליקציה חדשה', 'מתארים לעוזר מה צריך, במילים פשוטות'] },
-  questions: { segs: [S('build', 16.6, 41.4, F(16.6, .5, .4, 1.8), F(22, .5, .5, 1.8), F(30, .5, .6, 1.8), F(36, .5, .68, 1.8), F(41.4, .5, .7, 1.8))], cap: ['שאלות מכוונות', 'העוזר מברר לפני שהוא בונה'] },
-  spec: { segs: [S('build', 41.4, 63.2, F(41.4, .5, .38, 1.55), F(45, .5, .55, 1.55), F(48.5, .5, .75, 1.8), F(53, .5, .75, 1.8), F(56, .5, .6, 1.55), F(61.5, .5, .74, 1.6), F(63.2, .5, .74, 1.6))], cap: ['אפיון לאישור', 'תיקון בשיחה, ואישור לפני בנייה'] },
-  building: { segs: [S('build', 63, 71.6, F(63, .5, .55, 1.7), F(67.5, .5, .5, 1.7), F(71.6, .5, .5, 1.7))], cap: ['הבנייה', 'נתונים, הרשאות, לוגיקה ומסכים'] },
-  tour: { segs: [S('tour', 0.5, 26, F(0, .45, .3, 1.3), F(3.5, .45, .3, 1.3), F(5, .45, .5, 1.1), F(10, .45, .5, 1.1), F(11.5, .5, .3, 1.6), F(17, .4, .3, 1.6), F(19, .5, .55, 1.6), F(26, .45, .55, 1.6))], cap: ['האפליקציה שנבנתה', 'מסכים, מפה, תהליך והגדרות'] },
-  viewas: { segs: [S('viewas', 0.5, 15.8, F(0, .45, .3, 1.2), F(1.5, .2, .12, 1.8), F(4.5, .2, .12, 1.8), F(6, .5, .35, 1.2), F(15.8, .5, .35, 1.2))], cap: ['צפייה בתור', 'רואים את המערכת בעיני כל תפקיד'] },
-  bot: { segs: [S('bot', 0.5, 35.2, F(0, .5, .5, 1.05), F(2, .15, .55, 1.85), F(35.2, .15, .6, 1.85))], cap: ['בוט חדש', 'מוגדר בשיחה, ופתוח רק למוקד'] },
-  golive: { segs: [S('guided', 0.5, 16.5, F(0, .55, .2, 1.9), F(8, .55, .2, 1.9), F(10, .55, .22, 1.9), F(16.5, .55, .26, 1.9)), S('approve', 0.5, 10, F(0, .55, .2, 1.9), F(10, .55, .2, 1.9))], cap: ['בדיקה מונחית ואישור', 'עולים לאוויר רק כשמנהל נוסף מאשר'] },
-  change: { segs: [S('change', 1.5, 26.7, F(0, .5, .5, 1.05), F(2.5, .15, .6, 1.85), F(26.7, .15, .6, 1.85))], cap: ['שינוי במערכת', 'בקשה בשיחה, גרסה חדשה, אישור'] },
-  'r-intake': { segs: [S('intake', 8.5, 27, F(8.5, .15, .6, 1.85), F(20.5, .15, .6, 1.85), F(22, .38, .5, 1.3), F(27, .38, .5, 1.3))], cap: ['בוט קליטת הפניות', 'פנייה נפתחת מתוך שיחה'], maxRate: 2.4 },
-  'r-manager': { segs: [S('manager', 0, 4.5, F(0, .2, .12, 1.7), F(4.5, .2, .12, 1.7)), S('manager', 11.5, 19, F(11.5, .72, .3, 1.5), F(19, .72, .3, 1.5)), S('manager', 20.5, 26.8, F(20.5, .45, .5, 1.1), F(26.8, .45, .5, 1.2)), S('morning', 13, 21, F(13, .15, .6, 1.85), F(21, .15, .62, 1.85)), S('morning', 24.5, 29.3, F(24.5, .15, .62, 1.85), F(29.3, .15, .62, 1.85))], cap: ['מנהל המחלקה', 'התראות, לוח טיפול, מפה ובוט אישי'], maxRate: 2.6 },
-  'r-close': { segs: [S('close', 3.5, 14.3, F(3.5, .45, .3, 1.5), F(4.5, .5, .45, 1.6), F(14.3, .5, .45, 1.6)), S('automation', 1, 5.5, F(1, .55, .62, 1.8), F(5.5, .55, .62, 1.8))], cap: ['עדכון לתושב', 'מייל אוטומטי בסגירת הפנייה'], maxRate: 2.6 },
-  'r-overview': { segs: [S('overview', 0, 10, F(0, .45, .25, 1.4), F(3, .45, .3, 1.4), F(7, .4, .5, 1.25), F(10, .4, .5, 1.25))], cap: ['תמונת מצב להנהלה', 'תחומים, יישובים, זמני טיפול ושביעות רצון'], maxRate: 2.2 },
+  describe: { segs: [S('build', 0, 19.3, F(0, .5, .5, 1), F(7.4, .5, .5, 1), F(9.4, .5, .55, 1.12), F(19.3, .5, .55, 1.12))], cap: ['אפליקציה חדשה', 'מתחילים בשיחה עם העוזר'] },
+  questions: { segs: [S('build', 19.3, 44, F(19.3, .5, .5, 1.12), F(44, .5, .5, 1.12))], cap: ['שאלות מכוונות', 'העוזר מברר לפני שהוא בונה'] },
+  spec: { segs: [S('build', 44, 65.6, F(44, .5, .5, 1.1), F(51, .5, .55, 1.1), F(58.6, .5, .5, 1.1), F(65.6, .5, .55, 1.1))], cap: ['אפיון לאישור', 'תיקון בשיחה, ואישור לפני בנייה'] },
+  building: { segs: [S('build', 65.6, 73, F(65.6, .5, .5, 1.12), F(69.6, .5, .5, 1.12), F(70.4, .5, .5, 1), F(73, .5, .5, 1))], cap: ['הבנייה', 'נתונים, הרשאות, לוגיקה ומסכים'] },
+  tour: { segs: [S('tour', 0.5, 32.8, F(0, .5, .5, 1), F(9.2, .5, .5, 1), F(10.5, .45, .38, 1.15), F(25, .45, .38, 1.15), F(26.6, .45, .55, 1.15), F(32.8, .45, .55, 1.15))], cap: ['האפליקציה שנבנתה', 'מסכים, מפה, תהליך והגדרות'] },
+  viewas: { segs: [S('viewas', 0.3, 21.6, F(0, .5, .5, 1), F(1, .25, .28, 1.25), F(6.9, .25, .28, 1.25), F(8, .5, .5, 1), F(12.6, .5, .5, 1), F(13.4, .25, .28, 1.25), F(18, .25, .28, 1.25), F(19, .5, .5, 1), F(21.6, .5, .5, 1))], cap: ['צפייה בתור', 'רואים את המערכת בעיני כל תפקיד'] },
+  bot: { segs: [S('bot', 0.3, 34.8, F(0, .5, .5, 1), F(2, .3, .55, 1.2), F(34.8, .3, .55, 1.2))], cap: ['בוט חדש', 'מוגדר בשיחה, ופתוח רק למוקד'] },
+  golive: { segs: [S('guided', 0.3, 16.5, F(0, .55, .4, 1.1), F(16.5, .55, .4, 1.1)), S('approve', 0.3, 10, F(0, .55, .35, 1.15), F(10, .55, .35, 1.15))], cap: ['בדיקה מונחית ואישור', 'עולים לאוויר רק כשמנהל נוסף מאשר'] },
+  change: { segs: [S('change', 1, 24, F(1, .5, .5, 1), F(2.5, .3, .55, 1.2), F(24, .3, .55, 1.2))], cap: ['שינוי במערכת', 'בקשה בשיחה, גרסה חדשה, אישור'] },
+  'r-intake': { segs: [S('intake', 8, 25.4, F(8, .3, .55, 1.2), F(20.6, .3, .55, 1.2), F(22, .5, .5, 1), F(25.4, .5, .5, 1))], cap: ['בוט קליטת הפניות', 'פנייה נפתחת מתוך שיחה'], maxRate: 2.4 },
+  'r-manager': { segs: [S('manager', 0.3, 6.5, F(0, .3, .2, 1.2), F(6.5, .3, .2, 1.2)), S('manager', 8, 20.5, F(8, .5, .5, 1), F(20.5, .5, .5, 1)), S('manager', 21.2, 28.3, F(21.2, .5, .5, 1), F(28.3, .5, .5, 1)), S('morning', 15.8, 22, F(15.8, .3, .55, 1.2), F(22, .3, .55, 1.2)), S('morning', 25, 28.8, F(25, .3, .55, 1.2), F(28.8, .3, .55, 1.2))], cap: ['מנהל המחלקה', 'התראות, לוח טיפול, מפה ובוט אישי'], maxRate: 2.6 },
+  'r-close': { segs: [S('close', 0.5, 13.2, F(0, .5, .5, 1.1), F(13.2, .5, .5, 1.1)), S('automation', 0.5, 5.6, F(0, .5, .6, 1.15), F(5.6, .5, .6, 1.15))], cap: ['עדכון לתושב', 'מייל אוטומטי בסגירת הפנייה'], maxRate: 2.6 },
+  'r-overview': { segs: [S('overview', 1, 9.5, F(1, .5, .5, 1), F(9.5, .5, .5, 1))], cap: ['תמונת מצב להנהלה', 'תחומים, יישובים, זמני טיפול ושביעות רצון'], maxRate: 2.2 },
 };
 
 /* ---------------------------------------------------------------- shared bits */
@@ -77,14 +79,15 @@ const Zoomed: React.FC<{ seg: Seg; rate: number; freeze?: boolean }> = ({ seg, r
   );
 };
 
+// The scene's title: a small label in the middle of the app's top bar, which is empty there, shown for a few seconds
 const Caption: React.FC<{ title: string; sub: string }> = ({ title, sub }) => {
   const f = useCurrentFrame();
-  const o = fadeIn(f, 8, 16) * interpolate(f, [190, 215], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+  const o = fadeIn(f, 6, 12) * interpolate(f, [120, 138], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
   return (
-    <div style={{ position: 'absolute', top: 44, right: 56, direction: 'rtl', opacity: o, transform: `translateY(${rise(f, 8, -20)}px)` }}>
-      <div style={{ background: 'rgba(22,27,75,.94)', color: '#fff', borderRadius: 18, padding: '18px 28px 18px 30px', boxShadow: '0 18px 50px rgba(10,14,40,.35)', borderRight: `8px solid ${GOLD}`, fontFamily: FONT }}>
-        <div style={{ fontSize: 34, fontWeight: 800, lineHeight: 1.2 }}>{title}</div>
-        <div style={{ fontSize: 24, fontWeight: 600, color: '#C9D6F2', marginTop: 4 }}>{sub}</div>
+    <div style={{ position: 'absolute', top: 10, left: 0, right: 0, display: 'flex', justifyContent: 'center', direction: 'rtl', opacity: o, transform: `translateY(${rise(f, 6, -14)}px)` }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 14, background: 'rgba(22,27,75,.96)', color: '#fff', borderRadius: 12, padding: '8px 22px', border: `2px solid ${GOLD}`, fontFamily: FONT, boxShadow: '0 8px 24px rgba(10,14,40,.3)' }}>
+        <span style={{ fontSize: 26, fontWeight: 800 }}>{title}</span>
+        <span style={{ fontSize: 20, fontWeight: 600, color: '#C9D6F2' }}>{sub}</span>
       </div>
     </div>
   );
@@ -315,7 +318,7 @@ export const Film: React.FC = () => {
       ))}
       {timeline.scenes.map((s) => (s.audio ? <Sequence key={'a' + s.id} from={s.voiceFrom} durationInFrames={s.voiceFrames + 15}><Audio src={staticFile(s.audio)} /></Sequence> : null))}
       <Audio src={staticFile('music.m4a')} volume={music} />
-      <Subtitles />
+      {SUBTITLES ? <Subtitles /> : null}
     </AbsoluteFill>
   );
 };

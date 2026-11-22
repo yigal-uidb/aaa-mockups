@@ -110,7 +110,7 @@ function RequestMap() {
   const points = shown.map((r) => ({ id: r.id, lat: r.location.lat, lng: r.location.lng, label: r.title + ' · ' + (lookups?.refs?.communities?.get(r.community) || ''), tone: r.urgency === 'סכנה בטיחותית' ? 'danger' : r.urgency === 'דחופה' ? 'warn' : 'info' }));
   return (
     <Page title="מפת פניות" count={shown.length}>
-      {loading ? <div style={{ height: 620 }} /> : <MapView points={points} height={620} onSelect={(p) => setOpen(shown.find((r) => r.id === p.id))} />}
+      {loading ? <div style={{ height: 480 }} /> : <MapView points={points} height={480} onSelect={(p) => setOpen(shown.find((r) => r.id === p.id))} />}
       {open ? (
         <Modal title={open.title} onClose={() => setOpen(null)} wide>
           <RecordForm entity="requests" record={open} fields={FORM} onSaved={() => setOpen(null)} onCancel={() => setOpen(null)} submitLabel="שמירה" />

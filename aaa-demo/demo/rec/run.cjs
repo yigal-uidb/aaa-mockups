@@ -13,10 +13,12 @@ const BAPP = () => sql("select a.id from apps a join orgs o on o.id=a.org_id whe
 const TOKEN = sql("select public_token from apps where id='" + APP + "'");
 
 let browser;
+const MARKS = {};
+function marker(name) { const t0 = Date.now(); MARKS[name] = {}; return (k) => { MARKS[name][k] = +((Date.now() - t0) / 1000).toFixed(2); }; }
 async function session(email, { env = 'live', start = 'requests', mobile = false, app = APP } = {}) {
   const ctx = await browser.newContext(mobile
     ? { viewport: { width: 430, height: 900 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, locale: 'he-IL' }
-    : { viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1, locale: 'he-IL' });
+    : { viewport: { width: 1440, height: 810 }, deviceScaleFactor: 4 / 3, locale: 'he-IL' });
   await L.setup(ctx);
   const page = await ctx.newPage();
   if (email) {
@@ -40,17 +42,19 @@ async function waitText(scope, text, timeout = 30000) {
 }
 
 const CLIPS = {
-
+  // ---- the build, in the council copy with no apps (seed-build.ts), then after-build.ts
   async build() {
     const { ctx, page } = await session('dana.b@emek.example', { start: '/', app: null });
     const stop = await L.record(page, OUT);
-    const t0 = Date.now();
-    const marks = {};
-    const mark = (k) => { marks[k] = +((Date.now() - t0) / 1000).toFixed(2); };
+    const mark = marker('build');
+    await wait(page, 1800);
+    mark('hoverNew');
+    await L.hover(page, page.getByText('אפליקציה חדשה').first(), 1000);
     await wait(page, 1200);
-    await L.click(page, page.getByText('אפליקציה חדשה').first(), { ms: 1000, wait: 1500 });
+    await L.click(page, page.getByText('אפליקציה חדשה').first(), { ms: 300, wait: 1500 });
+    mark('chat');
+    await L.click(page, page.locator('textarea[aria-label="הודעה לעוזר"]'), { ms: 700, wait: 300 });
     mark('typing');
-    await L.click(page, page.locator('textarea[aria-label="הודעה לעוזר"]'), { ms: 600, wait: 300 });
     await L.type(page, 'אנחנו מועצה אזורית עמק יזרעאל. אנחנו צריכים מערכת לניהול הקשר עם התושבים: פניות שמגיעות בטלפון, בוואטסאפ ובאתר, ניתוב שלהן למחלקות, מעקב אחרי זמני הטיפול, ועדכון לתושב כשהטיפול נגמר.', 24);
     await wait(page, 500);
     await L.click(page, page.locator('button.asst-send'), { ms: 500 });
@@ -68,7 +72,7 @@ const CLIPS = {
     mark('q4'); await answer(['5 ימים']);
     await waitText(page, 'אישור האפיון', 30000);
     mark('spec');
-    await wait(page, 1200);
+    await wait(page, 1500);
     await L.scroll(page, 500, 2500);
     await wait(page, 800);
     mark('fix');
@@ -84,26 +88,30 @@ const CLIPS = {
     mark('building');
     await waitText(page, 'האפליקציה מוכנה בסביבת הבדיקה', 180000);
     mark('built');
-    await wait(page, 1800);
-    const open = page.getByRole('button', { name: 'פתיחת האפליקציה' }).last();
-    if (await open.isVisible().catch(() => false)) await L.click(page, open, { ms: 800, wait: 3500 });
-    else await wait(page, 3000);
-    mark('app');
     await wait(page, 2500);
     await stop('build');
-    console.log('build marks', JSON.stringify(marks));
     await ctx.close();
   },
 
   async tour() {
     const { ctx, page } = await session('dana.b@emek.example', { env: 'test', start: 'requests', app: BAPP() });
     const stop = await L.record(page, OUT);
+    const mark = marker('tour');
     await wait(page, 1500);
     await L.hover(page, page.locator('iframe').first(), 800).catch(() => {});
-    await wait(page, 1000);
+    await wait(page, 800);
+    mark('map');
     await L.click(page, nav(page, 'מפת פניות'), { ms: 800, wait: 3200 });
+    mark('settings');
     await L.click(page, page.locator('aside.side').getByText('הגדרות').first(), { ms: 900, wait: 2200 });
     for (const t of ['קליטה וניתוב למחלקה', 'דחופה או סכנה', 'התראה מיידית למנהל']) { await L.hover(page, page.getByText(t).first(), 650); await wait(page, 350); }
+    const scroller = async (left) => page.getByText('טיפול בשטח').first().evaluate((el, left) => { let p = el; while (p && p.scrollWidth <= p.clientWidth + 2) p = p.parentElement; if (p) p.scrollTo({ left, behavior: 'smooth' }); }, left);
+    await scroller(-10000);
+    await wait(page, 1300);
+    for (const t of ['טיפול בשטח', 'חרגה מהיעד?', 'העברה להנהלה', 'סגירה ועדכון התושב']) { const l = page.getByText(t).first(); if (await l.isVisible().catch(() => false)) { const b = await l.boundingBox(); if (b && b.x > 0) { await L.cursorTo(page, b.x + b.width / 2, b.y + b.height / 2, 550); await wait(page, 300); } } }
+    await scroller(10000);
+    await wait(page, 900);
+    mark('rule');
     const input = page.locator('input[type=number]').first();
     await L.click(page, input, { ms: 900 });
     await page.keyboard.press('Control+A');
@@ -116,17 +124,20 @@ const CLIPS = {
   async viewas() {
     const { ctx, page } = await session('dana.b@emek.example', { env: 'test', start: 'requests', app: BAPP() });
     const stop = await L.record(page, OUT);
+    const mark = marker('viewas');
     await wait(page, 1200);
     const sel = page.locator('label.viewas select');
-    await L.click(page, sel, { ms: 900, wait: 400 });
-    const opt = await sel.locator('option').filter({ hasText: 'שירה לוי' }).first().getAttribute('value');
-    await sel.selectOption(opt);
-    await wait(page, 3000);
+    mark('open1');
+    await L.click(page, sel, { ms: 900, wait: 200 });
+    await L.pickFromList(page, sel, 'שירה לוי', { hold: 1300 });
+    mark('as1');
+    await wait(page, 2500);
     await L.hover(page, page.locator('aside.side').first(), 900);
     await wait(page, 1500);
-    await L.click(page, sel, { ms: 700, wait: 400 });
-    const opt2 = await sel.locator('option').filter({ hasText: 'סמיר חורי' }).first().getAttribute('value');
-    await sel.selectOption(opt2);
+    mark('open2');
+    await L.click(page, sel, { ms: 700, wait: 200 });
+    await L.pickFromList(page, sel, 'סמיר חורי', { hold: 1100 });
+    mark('as2');
     await wait(page, 3500);
     await stop('viewas');
     await ctx.close();
@@ -135,20 +146,25 @@ const CLIPS = {
   async bot() {
     const { ctx, page } = await session('dana.b@emek.example', { env: 'test', start: 'requests', app: BAPP() });
     const stop = await L.record(page, OUT);
+    const mark = marker('bot');
     await wait(page, 800);
     await L.click(page, page.locator('button.fab'), { ms: 900, wait: 900 });
+    mark('list');
     await L.click(page, page.locator('.asst-who'), { ms: 700, wait: 800 });
     await L.click(page, page.getByRole('button', { name: 'בוט חדש' }), { ms: 700, wait: 800 });
+    mark('form');
     await L.click(page, page.locator('input[placeholder="למשל: גבייה"]'), { ms: 500, wait: 200 });
     await L.type(page, 'קליטת פניות', 60);
     await L.click(page, page.locator('button[aria-label="צבע #0E7C86"]'), { ms: 600, wait: 300 });
     await L.click(page, page.locator('label').filter({ hasText: 'משותף' }).first(), { ms: 600, wait: 400 });
     await L.click(page, page.locator('.bot-roles label').filter({ hasText: 'מוקד' }).first(), { ms: 600, wait: 400 });
     await L.click(page, page.getByRole('button', { name: 'יצירת הבוט' }), { ms: 700, wait: 1500 });
+    mark('talk');
     await L.click(page, page.locator('textarea[aria-label="הודעה לעוזר"]'), { ms: 600, wait: 300 });
     await L.type(page, 'התפקיד שלך הוא לעזור למוקד לקלוט פניות של תושבים מתוך שיחה: לזהות יישוב, תחום ודחיפות, לבדוק שאין כבר פנייה פתוחה על אותו מקום, ולפתוח פנייה חדשה.', 24);
     await L.click(page, page.locator('button.asst-send'), { ms: 500 });
     await waitText(page, 'המוקדנים יראו את הבוט', 60000);
+    mark('saved');
     await wait(page, 3000);
     await stop('bot');
     await ctx.close();
@@ -157,9 +173,11 @@ const CLIPS = {
   async guided() {
     const { ctx, page } = await session('dana.b@emek.example', { env: 'test', start: 'test', app: BAPP() });
     const stop = await L.record(page, OUT);
+    const mark = marker('guided');
     await wait(page, 1500);
     for (const s of await page.locator('.step').all()) { await L.hover(page, s, 600); await wait(page, 400); }
     await wait(page, 600);
+    mark('publish');
     await L.click(page, page.locator('aside.side').getByText('העלאה לאוויר').first(), { ms: 900, wait: 2200 });
     await L.click(page, page.getByRole('button', { name: 'להעלות לאוויר' }), { ms: 800, wait: 3000 });
     await stop('guided');
@@ -170,111 +188,60 @@ const CLIPS = {
     const { ctx, page } = await session('uri.b@emek.example', { env: 'test', start: 'publish', app: BAPP() });
     const stop = await L.record(page, OUT);
     await wait(page, 1500);
-    await L.scroll(page, 250, 900);
+    await L.hover(page, page.getByText('בקשה שמחכה לאישור').first(), 900).catch(() => {});
     await wait(page, 1500);
     await L.click(page, page.getByRole('button', { name: 'אישור' }).first(), { ms: 900, wait: 3000 });
     await stop('approve');
     await ctx.close();
   },
-  async home() {
-    const { ctx, page } = await session('dana@emek.example', { start: '/' });
-    const stop = await L.record(page, OUT);
-    await wait(page, 1200);
-    await L.hover(page, page.getByText('מועצה אזורית עמק יזרעאל').first(), 900);
-    await wait(page, 700);
-    await L.click(page, page.getByText('פניות תושבים').first(), { ms: 900 });
-    await wait(page, 3500);
-    await stop('home');
-    await ctx.close();
-  },
 
-  async flow() {
-    const { ctx, page } = await session('dana@emek.example', { start: 'settings' });
-    const stop = await L.record(page, OUT);
-    await wait(page, 1000);
-    for (const t of ['קליטה וניתוב למחלקה', 'דחופה או סכנה', 'התראה מיידית למנהל', 'טיפול בשטח']) {
-      await L.hover(page, page.getByText(t).first(), 700);
-      await wait(page, 450);
-    }
-    const flowBox = page.getByText('טיפול בשטח').first();
-    await flowBox.evaluate((el) => { let p = el; while (p && p.scrollWidth <= p.clientWidth + 2) p = p.parentElement; if (p) p.scrollTo({ left: -10000, behavior: 'smooth' }); });
-    await wait(page, 1200);
-    for (const t of ['חרגה מהיעד?', 'העברה להנהלה', 'סגירה ועדכון התושב']) {
-      const loc = page.getByText(t).first();
-      if (await loc.isVisible().catch(() => false)) { await L.hover(page, loc, 650); await wait(page, 400); }
-    }
-    const input = page.locator('input[type=number]').first();
-    await L.click(page, input, { ms: 900 });
-    await page.keyboard.press('Control+A');
-    await L.type(page, '4', 80);
-    await wait(page, 400);
-    await L.click(page, page.getByRole('button', { name: 'שמירה' }).first(), { ms: 600 });
-    await wait(page, 2200);
-    await stop('flow');
-    await ctx.close();
-  },
-
-  async requests() {
-    const { ctx, page, app } = await session('shira@emek.example');
-    const stop = await L.record(page, OUT);
-    await wait(page, 800);
-    await L.hover(page, app.getByText('פניות פתוחות').first(), 800);
-    await wait(page, 500);
-    await L.hover(page, app.getByText('חרגו מיעד הטיפול').first(), 700);
-    await wait(page, 600);
-    await L.hover(page, app.locator('.k-badge-danger').first(), 800);
-    await wait(page, 600);
-    await L.scroll(page, 420, 1200);
-    await wait(page, 600);
-    await L.hover(page, app.locator('.k-badge-danger').nth(3), 800);
-    await wait(page, 900);
-    await stop('requests');
-    await ctx.close();
-  },
-
+  // ---- the result, in the council that has worked with the app for weeks (seed-emek.ts)
   async intake() {
     const { ctx, page } = await session('shira@emek.example');
     const stop = await L.record(page, OUT);
+    const mark = marker('intake');
     await wait(page, 700);
     await L.click(page, page.locator('button.fab'), { ms: 900, wait: 900 });
     await L.click(page, page.locator('.asst-who'), { ms: 700, wait: 800 });
     await L.click(page, page.locator('.bot-pick').filter({ hasText: 'קליטת פניות' }), { ms: 600, wait: 1000 });
+    mark('typing');
     await L.click(page, page.locator('textarea[aria-label="הודעה לעוזר"]'), { ms: 500, wait: 300 });
-    await L.type(page, 'תושבת מנהלל, מיכל אדלר 052-4418830, michal.adler@mail.example, מדווחת שהפנס ברחוב הזיתים מול הצרכנייה לא דולק כבר שלושה ימים', 30);
-    await wait(page, 500);
+    await L.type(page, 'תושבת מנהלל, מיכל אדלר 052-4418830, michal.adler@mail.example, מדווחת שהפנס ברחוב הזיתים מול הצרכנייה לא דולק כבר שלושה ימים', 26);
+    await wait(page, 400);
     await L.click(page, page.locator('button.asst-send'), { ms: 500 });
+    mark('sent');
+    await page.locator('.asst-did').first().waitFor({ state: 'visible', timeout: 60000 });
+    mark('created');
     await waitText(page, 'יראה אותה בלוח הטיפול', 60000);
-    await wait(page, 3000);
+    mark('done');
+    await wait(page, 2500);
     await stop('intake');
     await ctx.close();
   },
 
   async manager() {
+    sql("update records set data = jsonb_set(data, '{status}', to_jsonb('חדשה'::text)) where entity='requests' and data->>'title' like 'פנס רחוב לא דולק, רחוב הזיתים%' and env='live'");
     const { ctx, page, app } = await session('amit@emek.example');
     const stop = await L.record(page, OUT);
+    const mark = marker('manager');
     await wait(page, 900);
     await L.click(page, page.locator('button.bar-icon[aria-label="התראות"]'), { ms: 900, wait: 1200 });
     const note = page.locator('.notes .note').filter({ hasText: 'רחוב הזיתים' }).first();
     await L.hover(page, note, 600);
     await wait(page, 900);
-    await L.click(page, note, { ms: 300, wait: 2600 });
-    // the record opens over the board: close it, then move the card to "בטיפול"
-    const closeBtn = page.locator('[aria-label="סגירה"], .modal-close, button:has-text("×")').first();
-    if (await closeBtn.isVisible().catch(() => false)) await L.click(page, closeBtn, { ms: 700, wait: 900 });
-    else {
-      const appClose = app.locator('.k-modal button, button[aria-label="סגירה"]').first();
-      if (await appClose.isVisible().catch(() => false)) await L.click(page, appClose, { ms: 700, wait: 900 });
-    }
-    if (!page.url().includes('/board')) { await L.click(page, nav(page, 'לוח טיפול'), { ms: 800, wait: 2200 }); }
+    await L.click(page, page.locator('button.bar-icon[aria-label="התראות"]'), { ms: 400, wait: 500 });
+    mark('board');
+    await L.click(page, nav(page, 'לוח טיפול'), { ms: 800, wait: 2500 });
     const card = app.locator('.k-kcard').filter({ hasText: 'רחוב הזיתים' }).first();
     await L.hover(page, card, 900);
-    await wait(page, 500);
+    await wait(page, 400);
     const sel = card.locator('select.k-kmove');
-    await L.click(page, sel, { ms: 500, wait: 300 });
-    await sel.selectOption('בטיפול');
+    mark('move');
+    await L.click(page, sel, { ms: 500, wait: 200 });
+    await L.pickFromList(page, sel, 'בטיפול', { hold: 1000 });
     await wait(page, 1800);
+    mark('map');
     await L.click(page, nav(page, 'מפת פניות'), { ms: 900, wait: 3500 });
-    await L.hover(page, page.locator('iframe').first(), 600).catch(() => {});
     await wait(page, 1500);
     await stop('manager');
     await ctx.close();
@@ -283,18 +250,22 @@ const CLIPS = {
   async morning() {
     const { ctx, page } = await session('amit@emek.example', { start: 'board' });
     const stop = await L.record(page, OUT);
+    const mark = marker('morning');
     await wait(page, 700);
     await L.click(page, page.locator('button.fab'), { ms: 900, wait: 900 });
     await L.click(page, page.locator('.asst-who'), { ms: 700, wait: 800 });
     await L.click(page, page.locator('.bot-pick').filter({ hasText: 'סיכום בוקר' }), { ms: 600, wait: 1000 });
+    mark('ask');
     await L.click(page, page.locator('.option').filter({ hasText: 'מה דחוף היום?' }), { ms: 700 });
     await waitText(page, 'כדאי להתחיל', 60000);
+    mark('summary');
     await wait(page, 2600);
     await L.click(page, page.locator('textarea[aria-label="הודעה לעוזר"]'), { ms: 500, wait: 300 });
     await L.type(page, 'תסגור את הפנייה על הפנס בנהלל', 40);
     await L.click(page, page.locator('button.asst-send'), { ms: 500 });
     await waitText(page, 'לקריאה בלבד', 60000);
-    await wait(page, 3200);
+    mark('blocked');
+    await wait(page, 3000);
     await stop('morning');
     await ctx.close();
   },
@@ -302,28 +273,26 @@ const CLIPS = {
   async close() {
     const { ctx, page, app } = await session('amit@emek.example');
     const stop = await L.record(page, OUT);
+    const mark = marker('close');
     await wait(page, 800);
     const row = app.locator('tr').filter({ hasText: 'רחוב הזיתים' }).first();
     await L.hover(page, row, 900);
-    await wait(page, 400);
     await L.click(page, row.getByRole('button', { name: 'סגירה' }), { ms: 700, wait: 900 });
+    mark('modal');
     await L.click(page, app.locator('textarea').first(), { ms: 600, wait: 300 });
     await L.type(page, 'הוחלפה נורה בפנס, נבדק בערב ודולק', 38);
-    await wait(page, 500);
     await L.click(page, app.getByRole('button', { name: 'סגירה ועדכון התושב' }), { ms: 700, wait: 2600 });
     await stop('close');
     await ctx.close();
   },
 
   async automation() {
-    sql("update emails set status = 'sent', sent_at = now(), note = null where status in ('held','queued')");
+    sql("update emails set status = 'sent', sent_at = now(), note = null where status in ('held','queued','failed','sending')");
     const { ctx, page } = await session('dana@emek.example', { start: 'automation' });
     const stop = await L.record(page, OUT);
     await wait(page, 900);
     await L.hover(page, page.getByText('הפנייה שלך למועצה טופלה').first(), 1000).catch(() => {});
-    await wait(page, 1200);
-    await L.hover(page, page.getByText('בדיקת בוקר').first(), 900).catch(() => {});
-    await wait(page, 1800);
+    await wait(page, 2500);
     await stop('automation');
     await ctx.close();
   },
@@ -356,9 +325,9 @@ const CLIPS = {
     const { ctx, page } = await session('uri@emek.example', { start: 'overview' });
     const stop = await L.record(page, OUT);
     await wait(page, 1500);
-    await L.hover(page, page.locator('iframe').first(), 900).catch(() => {});
-    await wait(page, 800);
-    await L.scroll(page, 520, 1600);
+    await L.hover(page, page.locator('iframe').first(), 800);
+    await wait(page, 600);
+    await L.scroll(page, 450, 1600);
     await wait(page, 2500);
     await stop('overview');
     await ctx.close();
@@ -367,41 +336,34 @@ const CLIPS = {
   async change() {
     const { ctx, page } = await session('dana@emek.example', { start: 'requests' });
     const stop = await L.record(page, OUT);
+    const mark = marker('change');
     await wait(page, 700);
     await L.click(page, page.locator('button.fab'), { ms: 900, wait: 1000 });
     await L.click(page, page.locator('textarea[aria-label="הודעה לעוזר"]'), { ms: 500, wait: 300 });
     await L.type(page, 'אני רוצה שכל יום ראשון בבוקר כל רכז יישוב יקבל במייל את הפניות הפתוחות ביישוב שלו, ושבפנייה יהיה סימון "ועד היישוב עודכן"', 26);
     await L.click(page, page.locator('button.asst-send'), { ms: 500 });
     await waitText(page, 'אישור האפיון', 60000);
-    await wait(page, 1500);
-    await L.hover(page, page.getByText('כל יום ראשון ב-08:00').first(), 800).catch(() => {});
-    await wait(page, 1200);
+    mark('spec');
+    await wait(page, 2000);
     await L.click(page, page.getByRole('button', { name: 'אישור האפיון' }), { ms: 800 });
+    mark('building');
     await waitText(page, 'גרסה חדשה מוכנה', 120000);
+    mark('done');
     await wait(page, 2500);
     await stop('change');
-    await ctx.close();
-  },
-
-  async publish() {
-    const { ctx, page } = await session('dana@emek.example', { env: 'test', start: 'versions' });
-    const stop = await L.record(page, OUT);
-    await wait(page, 1500);
-    await L.hover(page, page.getByText('סיכום שבועי לרכזי היישובים').first(), 900).catch(() => {});
-    await wait(page, 1200);
-    await L.click(page, nav(page, 'העלאה לאוויר'), { ms: 900, wait: 2500 });
-    await L.scroll(page, 300, 900);
-    await wait(page, 2500);
-    await stop('publish');
     await ctx.close();
   },
 };
 
 (async () => {
   browser = await chromium.launch();
-  const names = process.argv.slice(2).length ? process.argv.slice(2) : Object.keys(CLIPS);
+  const names = process.argv.slice(2).length ? process.argv.slice(2) : ['intake', 'manager', 'morning', 'close', 'automation', 'public', 'overview', 'change'];
   for (const n of names) {
     try { await CLIPS[n](); } catch (e) { console.error(`clip ${n} failed:`, e.message.split('\n')[0]); }
   }
   await browser.close();
+  const fs = require('fs');
+  const file = OUT + '/marks.json';
+  const all = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : {};
+  fs.writeFileSync(file, JSON.stringify(Object.assign(all, MARKS), null, 2));
 })();

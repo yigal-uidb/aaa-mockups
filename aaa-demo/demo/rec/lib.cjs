@@ -11,7 +11,7 @@ const CURSOR = `
   const add = () => {
     const c = document.createElement('div');
     c.id = '__cur';
-    c.style.cssText = 'position:fixed;left:0;top:0;width:28px;height:28px;z-index:2147483647;pointer-events:none;transform:translate(960px,540px);transition:none;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))';
+    c.style.cssText = 'position:fixed;left:0;top:0;width:28px;height:28px;z-index:2147483647;pointer-events:none;transform:translate(720px,405px);transition:none;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))';
     c.innerHTML = '<svg width="28" height="28" viewBox="0 0 28 28"><path d="M4 2 L4 22 L9.5 17 L13.5 26 L17 24.5 L13 15.8 L20.5 15.8 Z" fill="#fff" stroke="#111" stroke-width="1.6" stroke-linejoin="round"/></svg>';
     const r = document.createElement('div');
     r.id = '__ripple';
@@ -27,7 +27,7 @@ async function setup(ctx) {
 
 const pos = new WeakMap();
 async function cursorTo(page, x, y, ms = 650) {
-  const from = pos.get(page) || { x: 960, y: 540 };
+  const from = pos.get(page) || { x: 720, y: 405 };
   const steps = Math.max(8, Math.round(ms / 16));
   for (let i = 1; i <= steps; i++) {
     const t = i / steps;
@@ -112,4 +112,36 @@ async function record(page, outDir, { w = 1920, h = 1080 } = {}) {
   };
 }
 
-module.exports = { setup, cursorTo, hover, click, type, scroll, record, center };
+/** Opens a native select the way a browser shows it: a list of its real options under it. Picks one and closes. */
+async function pickFromList(page, sel, text, { hold = 900 } = {}) {
+  await sel.evaluate((el, text) => {
+    const r = el.getBoundingClientRect();
+    const box = document.createElement('div');
+    box.id = '__picklist';
+    const w = Math.max(r.width, 220);
+    box.style.cssText = `position:fixed;top:${r.bottom + 4}px;left:${Math.max(8, r.right - w)}px;width:${w}px;background:#fff;border:1px solid #c9cfdd;border-radius:10px;box-shadow:0 12px 32px rgba(20,24,60,.22);z-index:2147483600;padding:6px 0;direction:rtl;font:inherit;font-size:15px`;
+    for (const o of el.options) {
+      if (!o.textContent.trim()) continue;
+      const d = document.createElement('div');
+      d.textContent = o.textContent;
+      d.dataset.v = o.value;
+      d.style.cssText = 'padding:9px 14px;white-space:nowrap;color:#1b1e2e' + (o.selected ? ';font-weight:700' : '');
+      if (o.textContent.includes(text)) d.dataset.target = '1';
+      box.append(d);
+    }
+    document.body.append(box);
+  }, text);
+  await page.waitForTimeout(400);
+  const frame = sel.page ? null : null;
+  const item = sel.locator('xpath=//ancestor::body').locator('#__picklist [data-target="1"]').first();
+  const b = await item.boundingBox();
+  if (b) await cursorTo(page, b.x + b.width / 2, b.y + b.height / 2, 700);
+  await item.evaluate((d) => { d.style.background = '#e1ecfb'; d.style.color = '#1f5fa6'; d.style.fontWeight = '700'; });
+  await page.waitForTimeout(hold);
+  const value = await item.getAttribute('data-v');
+  await item.evaluate(() => document.getElementById('__picklist')?.remove());
+  await sel.selectOption(value);
+  await page.waitForTimeout(250);
+}
+
+module.exports = { pickFromList, setup, cursorTo, hover, click, type, scroll, record, center };

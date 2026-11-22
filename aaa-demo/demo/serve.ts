@@ -189,7 +189,7 @@ const newApp: Scenario = {
 };
 
 const botSetup: Scenario = {
-  match: (t) => t.includes('לעזור למוקד'),
+  match: (t) => t.includes('התפקיד שלך הוא'),
   steps: [
     async () => [say('הבנתי. אני שומר את ההגדרות.'), use('set_bot_profile', {
       goals: 'לעזור למוקד לקלוט פנייה של תושב מתוך שיחה: לזהות יישוב, תחום ודחיפות, לבדוק שאין כבר פנייה פתוחה על אותו מקום, ולפתוח פנייה חדשה',

@@ -1,0 +1,61 @@
+{
+  "build": {
+    "hoverNew": 1.8,
+    "chat": 7.4,
+    "typing": 9.42,
+    "sent": 19.29,
+    "q1": 19.29,
+    "q2": 25.66,
+    "q3": 37.12,
+    "q4": 40.15,
+    "spec": 43.99,
+    "fix": 51.41,
+    "spec2": 58.65,
+    "building": 65.64,
+    "built": 70.48
+  },
+  "tour": {
+    "map": 4.02,
+    "settings": 9.14,
+    "rule": 26.59
+  },
+  "viewas": {
+    "open1": 1.2,
+    "as1": 6.97,
+    "open2": 12.88,
+    "as2": 18.07
+  },
+  "bot": {
+    "list": 3.91,
+    "form": 8.97,
+    "talk": 20.18,
+    "saved": 31.8
+  },
+  "guided": {
+    "publish": 7.25
+  },
+  "intake": {
+    "typing": 8.79,
+    "sent": 17.81,
+    "created": 20.6,
+    "done": 22.91
+  },
+  "manager": {
+    "board": 8.01,
+    "move": 14.73,
+    "map": 21.18
+  },
+  "morning": {
+    "ask": 8.76,
+    "summary": 16.11,
+    "blocked": 25.83
+  },
+  "close": {
+    "modal": 5.39
+  },
+  "change": {
+    "spec": 13.43,
+    "building": 17.69,
+    "done": 21.5
+  }
+}

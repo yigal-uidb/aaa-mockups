@@ -67,7 +67,9 @@ for (const p of PEOPLE) {
   ids[p.email] = u.id;
   await q(`insert into memberships (org_id, user_id, role) values ($1, $2, $3) on conflict do nothing`, [org.id, u.id, p.org]);
 }
-const { app } = await createApp(org.id, 'moked', readAppDir(path.join(root, 'apps/emek-moked')), ids['dana@emek.example']);
+const files = readAppDir(path.join(root, 'apps/emek-moked'));
+delete files['seed.json']; // this council's data comes from the script below
+const { app } = await createApp(org.id, 'moked', files, ids['dana@emek.example']);
 for (const p of PEOPLE) if (p.role) await q(`insert into app_roles (app_id, user_id, role) values ($1, $2, $3)`, [app.id, ids[p.email], p.role]);
 const fresh = (await appById(app.id))!;
 const admin = await ctxFor(fresh, 'test', { userId: ids['dana@emek.example'], name: 'דנה כרמי', roles: ['management'], admin: true });
