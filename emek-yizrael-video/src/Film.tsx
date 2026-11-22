@@ -32,7 +32,7 @@ const SCENES: Record<string, { segs: Seg[]; cap?: [string, string]; maxRate?: nu
   change: { segs: [S('change', 1, 24, F(1, .5, .5, 1), F(2.5, .3, .55, 1.2), F(24, .3, .55, 1.2))], cap: ['שינוי במערכת', 'בקשה בשיחה, גרסה חדשה, אישור'] },
   'r-intake': { segs: [S('intake', 8, 25.4, F(8, .3, .55, 1.2), F(20.6, .3, .55, 1.2), F(22, .5, .5, 1), F(25.4, .5, .5, 1))], cap: ['בוט קליטת הפניות', 'פנייה נפתחת מתוך שיחה'], maxRate: 2.4 },
   'r-manager': { segs: [S('manager', 0.3, 6.5, F(0, .3, .2, 1.2), F(6.5, .3, .2, 1.2)), S('manager', 8, 20.5, F(8, .5, .5, 1), F(20.5, .5, .5, 1)), S('manager', 21.2, 28.3, F(21.2, .5, .5, 1), F(28.3, .5, .5, 1)), S('morning', 15.8, 22, F(15.8, .3, .55, 1.2), F(22, .3, .55, 1.2)), S('morning', 25, 28.8, F(25, .3, .55, 1.2), F(28.8, .3, .55, 1.2))], cap: ['מנהל המחלקה', 'התראות, לוח טיפול, מפה ובוט אישי'], maxRate: 2.6 },
-  'r-close': { segs: [S('close', 0.5, 13.2, F(0, .5, .5, 1.1), F(13.2, .5, .5, 1.1)), S('automation', 0.5, 5.6, F(0, .5, .6, 1.15), F(5.6, .5, .6, 1.15))], cap: ['עדכון לתושב', 'מייל אוטומטי בסגירת הפנייה'], maxRate: 2.6 },
+  'r-close': { segs: [S('close', 4, 13.2, F(0, .5, .5, 1.1), F(13.2, .5, .5, 1.1)), S('automation', 0.5, 4.5, F(0, .5, .6, 1.15), F(5.6, .5, .6, 1.15))], cap: ['עדכון לתושב', 'מייל אוטומטי בסגירת הפנייה'], maxRate: 2.6 },
   'r-overview': { segs: [S('overview', 1, 9.5, F(1, .5, .5, 1), F(9.5, .5, .5, 1))], cap: ['תמונת מצב להנהלה', 'תחומים, יישובים, זמני טיפול ושביעות רצון'], maxRate: 2.2 },
 };
 
@@ -182,7 +182,7 @@ const Problem: React.FC<{ scene: Scene }> = ({ scene }) => {
 /* the phone: the public form as a resident sees it */
 const PublicScene: React.FC<{ scene: Scene }> = ({ scene }) => {
   const f = useCurrentFrame();
-  const rate = Math.min(2.6, Math.max(1, 18 / (scene.frames / 30)));
+  const rate = Math.min(2.6, Math.max(1, 14 / (scene.frames / 30)));
   return (
     <AbsoluteFill style={{ fontFamily: FONT, direction: 'rtl' }}>
       <Backdrop />
@@ -193,7 +193,7 @@ const PublicScene: React.FC<{ scene: Scene }> = ({ scene }) => {
       </div>
       <div style={{ position: 'absolute', left: 300, top: 60, width: 470, height: 960, borderRadius: 64, background: '#0E1230', padding: 20, boxShadow: '0 40px 90px rgba(10,14,40,.35)', opacity: fadeIn(f, 0, 10), transform: `translateY(${rise(f, 0, 60)}px)` }}>
         <div style={{ width: '100%', height: '100%', borderRadius: 46, overflow: 'hidden', background: '#fff', position: 'relative' }}>
-          <OffthreadVideo src={staticFile('clips/public.mp4')} startFrom={130} playbackRate={rate} muted style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }} />
+          <OffthreadVideo src={staticFile('clips/public.mp4')} startFrom={240} playbackRate={rate} muted style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }} />
         </div>
       </div>
     </AbsoluteFill>
@@ -239,8 +239,8 @@ const LaterCard: React.FC = () => {
     <AbsoluteFill style={{ fontFamily: FONT, direction: 'rtl' }}>
       <Backdrop dark />
       <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center', color: '#fff', textAlign: 'center' }}>
-        <div style={{ fontSize: 34, fontWeight: 600, color: GOLD, opacity: fadeIn(f, 4) }}>והתוצאה</div>
-        <div style={{ fontSize: 92, fontWeight: 800, marginTop: 12, opacity: fadeIn(f, 10), transform: `translateY(${rise(f, 10)}px)` }}>אחרי כמה שבועות של עבודה</div>
+        <div style={{ fontSize: 34, fontWeight: 600, color: GOLD, opacity: fadeIn(f, 4) }}>ככה זה נראה</div>
+        <div style={{ fontSize: 92, fontWeight: 800, marginTop: 12, opacity: fadeIn(f, 10), transform: `translateY(${rise(f, 10)}px)` }}>כשמסיימים לבנות</div>
       </AbsoluteFill>
     </AbsoluteFill>
   );

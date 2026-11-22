@@ -35,10 +35,10 @@
     "publish": 7.25
   },
   "intake": {
-    "typing": 8.79,
-    "sent": 17.81,
-    "created": 20.6,
-    "done": 22.91
+    "typing": 8.86,
+    "sent": 17.73,
+    "created": 20.54,
+    "done": 22.83
   },
   "manager": {
     "board": 8.01,
@@ -51,7 +51,7 @@
     "blocked": 25.83
   },
   "close": {
-    "modal": 5.39
+    "modal": 5.38
   },
   "change": {
     "spec": 13.43,

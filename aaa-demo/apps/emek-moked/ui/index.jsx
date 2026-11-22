@@ -27,14 +27,16 @@ function CloseModal({ request, onClose }) {
   const save = () => sdk.action('closeRequest', { id: request.id, resolution: text }).then(() => { sdk.toast('הפנייה נסגרה והתושב עודכן'); onClose(); }, (e) => sdk.toast(e.message, 'error'));
   return (
     <Modal title={'סגירת הפנייה: ' + request.title} onClose={onClose}>
-      <label className="k-field k-field-wide">
-        <span>מה נעשה</span>
-        <textarea rows={4} value={text} onChange={(e) => setText(e.target.value)} />
-      </label>
-      <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-        <Button tone="primary" onClick={save}>סגירה ועדכון התושב</Button>
-        <Button onClick={onClose}>ביטול</Button>
-      </div>
+      <form className="k-form" onSubmit={(e) => { e.preventDefault(); save(); }}>
+        <label className="k-field k-field-wide">
+          <span>מה נעשה (התושב יקבל את זה במייל)</span>
+          <textarea rows={4} value={text} onChange={(e) => setText(e.target.value)} />
+        </label>
+        <footer>
+          <Button tone="primary" type="submit">סגירה ועדכון התושב</Button>
+          <Button type="button" onClick={onClose}>ביטול</Button>
+        </footer>
+      </form>
     </Modal>
   );
 }

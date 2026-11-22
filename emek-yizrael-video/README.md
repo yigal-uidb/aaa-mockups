@@ -14,7 +14,7 @@
 npm install
 ```
 ```bash
-ELEVENLABS_API_KEY=... npx tsx scripts/tts.ts
+ELEVENLABS_API_KEY=... npx tsx scripts/tts.mts
 ```
 ```bash
 npx tsx scripts/timeline.ts

@@ -1,186 +1,186 @@
 {
   "fps": 30,
-  "total": 4897,
+  "total": 5271,
   "scenes": [
     {
       "id": "s01",
       "visual": "card-open",
       "text": "מועצה אזורית עמק יזרעאל. ככה בונים מערכת לניהול הקשר עם התושבים: בשיחה, ובלי פרויקט פיתוח.",
       "from": 0,
-      "frames": 257,
+      "frames": 262,
       "voiceFrom": 36,
-      "voiceFrames": 200,
-      "audio": null
+      "voiceFrames": 205,
+      "audio": "audio/s01.mp3"
     },
     {
       "id": "s03",
       "visual": "describe",
       "text": "דנה, מנהלת מערכות המידע במועצה, פותחת אפליקציה חדשה בטריפל איי, ומתארת לעוזר, במילים שלה, מה המועצה צריכה: מערכת לפניות של תושבים.",
-      "from": 257,
-      "frames": 316,
-      "voiceFrom": 272,
-      "voiceFrames": 280,
-      "audio": null
+      "from": 262,
+      "frames": 356,
+      "voiceFrom": 277,
+      "voiceFrames": 320,
+      "audio": "audio/s03.mp3"
     },
     {
       "id": "s04",
       "visual": "questions",
       "text": "העוזר לא קופץ לכתוב קוד. כמו יועץ, הוא שואל שאלות מכוונות: מי קולט את הפניות, אילו מחלקות מטפלות, מה עושים בפנייה מסוכנת, ותוך כמה זמן צריך לטפל. דנה עונה בלחיצה.",
-      "from": 573,
-      "frames": 439,
-      "voiceFrom": 588,
-      "voiceFrames": 400,
-      "audio": null
+      "from": 617,
+      "frames": 414,
+      "voiceFrom": 632,
+      "voiceFrames": 375,
+      "audio": "audio/s04.mp3"
     },
     {
       "id": "s05",
       "visual": "spec",
       "text": "מהתשובות, העוזר מסכם אפיון: תפקידים, תהליך עבודה, מסכים והתראות. דנה מבקשת להוסיף טופס לתושבים באתר המועצה, והאפיון מתעדכן. רק אחרי שהיא מאשרת, מתחילים לבנות.",
-      "from": 1012,
-      "frames": 365,
-      "voiceFrom": 1027,
-      "voiceFrames": 320,
-      "audio": null
+      "from": 1031,
+      "frames": 430,
+      "voiceFrom": 1046,
+      "voiceFrames": 385,
+      "audio": "audio/s05.mp3"
     },
     {
       "id": "s06",
       "visual": "building",
       "text": "עכשיו העוזר כותב את המערכת עצמה: מבנה הנתונים, ההרשאות, הלוגיקה והמסכים. תוך דקות יש אפליקציה עובדת, בסביבת בדיקה נפרדת.",
-      "from": 1377,
-      "frames": 313,
-      "voiceFrom": 1392,
-      "voiceFrames": 253,
-      "audio": null
+      "from": 1461,
+      "frames": 367,
+      "voiceFrom": 1476,
+      "voiceFrames": 307,
+      "audio": "audio/s06.mp3"
     },
     {
       "id": "s07",
       "visual": "tour",
       "text": "הפניות, מפה של יישובי המועצה, ותהליך העבודה שתואר בשיחה, כתרשים. הכללים, כמו ימי היעד לטיפול, הם הגדרות שהמועצה משנה בעצמה, בלי מתכנת.",
-      "from": 1690,
-      "frames": 329,
-      "voiceFrom": 1705,
-      "voiceFrames": 293,
-      "audio": null
+      "from": 1828,
+      "frames": 367,
+      "voiceFrom": 1843,
+      "voiceFrames": 331,
+      "audio": "audio/s07.mp3"
     },
     {
       "id": "s08",
       "visual": "viewas",
       "text": "גם ההרשאות נגזרו מהאפיון. בצפייה בתור, דנה רואה את המערכת בדיוק כמו שהמוקדנית תראה אותה, וכמו שיראה עובד המחלקה.",
-      "from": 2020,
-      "frames": 289,
-      "voiceFrom": 2035,
-      "voiceFrames": 253,
-      "audio": null
+      "from": 2195,
+      "frames": 291,
+      "voiceFrom": 2210,
+      "voiceFrames": 255,
+      "audio": "audio/s08.mp3"
     },
     {
       "id": "s09",
       "visual": "bot",
       "text": "בוטים בונים באותה דרך, בשיחה. דנה יוצרת בוט משותף לקליטת פניות, פתוח רק למוקד, ומסבירה לו מה התפקיד שלו. הבוט תמיד פועל בהרשאות של מי שמדבר איתו.",
-      "from": 2309,
-      "frames": 411,
-      "voiceFrom": 2324,
-      "voiceFrames": 360,
-      "audio": null
+      "from": 2486,
+      "frames": 372,
+      "voiceFrom": 2501,
+      "voiceFrames": 321,
+      "audio": "audio/s09.mp3"
     },
     {
       "id": "s10",
       "visual": "golive",
       "text": "לפני שהמערכת נפתחת לעובדים, היא בודקת בעצמה שהתהליכים המרכזיים עובדים. דנה מבקשת להעלות לאוויר, ומנהל נוסף במועצה מקבל סיכום של מה נפתח ולמי, ומאשר.",
-      "from": 2720,
-      "frames": 371,
-      "voiceFrom": 2735,
-      "voiceFrames": 320,
-      "audio": null
+      "from": 2858,
+      "frames": 401,
+      "voiceFrom": 2873,
+      "voiceFrames": 350,
+      "audio": "audio/s10.mp3"
     },
     {
       "id": "s11",
       "visual": "change",
       "text": "וגם אחר כך, כל שינוי מתחיל בבקשה לעוזר, נבנה כגרסה חדשה בסביבת הבדיקה, ועולה לאוויר רק באישור.",
-      "from": 3091,
-      "frames": 263,
-      "voiceFrom": 3106,
-      "voiceFrames": 227,
-      "audio": null
+      "from": 3260,
+      "frames": 270,
+      "voiceFrom": 3275,
+      "voiceFrames": 234,
+      "audio": "audio/s11.mp3"
     },
     {
       "id": "s12",
       "visual": "claude",
       "text": "ואת אותה שיחה עם העוזר אפשר לנהל גם מתוך קלוד. טריפל איי מתחברת כקונקטור, עם אותן הרשאות.",
-      "from": 3354,
-      "frames": 284,
-      "voiceFrom": 3369,
-      "voiceFrames": 227,
-      "audio": null
+      "from": 3529,
+      "frames": 243,
+      "voiceFrom": 3544,
+      "voiceFrames": 186,
+      "audio": "audio/s12.mp3"
     },
     {
       "id": "s13",
       "visual": "card-later",
       "text": "",
-      "from": 3637,
+      "from": 3772,
       "frames": 75,
-      "voiceFrom": 3643,
+      "voiceFrom": 3778,
       "voiceFrames": 0,
       "audio": null
     },
     {
       "id": "s14",
       "visual": "r-intake",
-      "text": "וכך זה נראה אחרי כמה שבועות של עבודה. המוקדנית פותחת פנייה בשיחה עם הבוט, והיא מנותבת מיד למחלקה הנכונה.",
-      "from": 3712,
-      "frames": 289,
-      "voiceFrom": 3727,
-      "voiceFrames": 253,
-      "audio": null
+      "text": "וכך יכולה להיראות המערכת כשמסיימים לבנות אותה. המוקדנית פותחת פנייה בשיחה עם הבוט, והיא מנותבת מיד למחלקה הנכונה.",
+      "from": 3847,
+      "frames": 280,
+      "voiceFrom": 3862,
+      "voiceFrames": 244,
+      "audio": "audio/s14.mp3"
     },
     {
       "id": "s15",
       "visual": "r-manager",
       "text": "מנהל המחלקה מקבל התראה, ועובד מלוח הטיפול וממפת היישובים. הבוט האישי שלו מסכם מה דחוף, ומוגבל לקריאה בלבד.",
-      "from": 4002,
-      "frames": 276,
-      "voiceFrom": 4017,
-      "voiceFrames": 240,
-      "audio": null
+      "from": 4127,
+      "frames": 304,
+      "voiceFrom": 4142,
+      "voiceFrames": 268,
+      "audio": "audio/s15.mp3"
     },
     {
       "id": "s16",
       "visual": "r-close",
       "text": "התושב מקבל עדכון במייל כשהטיפול נגמר,",
-      "from": 4278,
-      "frames": 116,
-      "voiceFrom": 4293,
-      "voiceFrames": 80,
-      "audio": null
+      "from": 4431,
+      "frames": 198,
+      "voiceFrom": 4446,
+      "voiceFrames": 78,
+      "audio": "audio/s16.mp3"
     },
     {
       "id": "s17",
       "visual": "public",
       "text": "יכול לפנות ישירות מהטלפון,",
-      "from": 4394,
-      "frames": 116,
-      "voiceFrom": 4409,
-      "voiceFrames": 53,
-      "audio": null
+      "from": 4628,
+      "frames": 166,
+      "voiceFrom": 4643,
+      "voiceFrames": 55,
+      "audio": "audio/s17.mp3"
     },
     {
       "id": "s18",
       "visual": "r-overview",
       "text": "ולהנהלה יש תמונת מצב מלאה.",
-      "from": 4510,
-      "frames": 118,
-      "voiceFrom": 4525,
-      "voiceFrames": 67,
-      "audio": null
+      "from": 4794,
+      "frames": 164,
+      "voiceFrom": 4809,
+      "voiceFrames": 74,
+      "audio": "audio/s18.mp3"
     },
     {
       "id": "s19",
       "visual": "card-close",
       "text": "מערכת שהמועצה בונה, משנה ומפעילה בעצמה, עם בקרה מלאה. טריפל איי.",
-      "from": 4628,
-      "frames": 270,
-      "voiceFrom": 4646,
-      "voiceFrames": 147,
-      "audio": null
+      "from": 4959,
+      "frames": 313,
+      "voiceFrom": 4977,
+      "voiceFrames": 190,
+      "audio": "audio/s19.mp3"
     }
   ]
 }
