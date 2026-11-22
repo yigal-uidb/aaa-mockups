@@ -140,7 +140,68 @@ const change: Scenario = {
   },
 };
 
-const SCENARIOS = [intake, morning, readOnly, change];
+
+const appFile = (f: string) => readFileSync(new URL('../apps/emek-moked/' + f, import.meta.url), 'utf8');
+const SPEC_BASE = [
+  { title: 'מי משתמש במערכת', items: ['מוקד: קולט פניות ופותח אותן', 'עובד מחלקה: מטפל בפניות של המחלקה', 'מנהל מחלקה: מקבל התראות, רואה את כל העבודה של המחלקה', 'הנהלת המועצה: תמונת מצב, ופניות שחרגו מהיעד'] },
+  { title: 'תהליך העבודה', items: ['פנייה נקלטת ומנותבת אוטומטית למחלקה לפי התחום', 'דחופה או סכנה בטיחותית: התראה מיידית למנהל המחלקה', 'יעד לטיפול: 5 ימים לפנייה רגילה, יום אחד לדחופה', 'כל בוקר: בדיקת חריגות, ופנייה שחרגה ב-3 ימים עוברת להנהלה', 'סגירה מחייבת לכתוב מה נעשה, והתושב מקבל עדכון במייל'] },
+  { title: 'פנייה', items: ['נושא, תחום, יישוב, דחיפות, פירוט, תמונה ומיקום', 'פרטי התושב, וערוץ הפנייה (טלפון, וואטסאפ, אתר)', 'מחלקה ומטפל, סטטוס ויעד לטיפול'] },
+  { title: 'מסכים', items: ['פניות, עם מה פתוח, מה דחוף ומה חרג', 'לוח טיפול לפי סטטוס', 'מפת פניות של יישובי המועצה', 'תמונת מצב להנהלה'] },
+  { title: 'מה המועצה משנה בעצמה, בלי גרסה חדשה', items: ['ימי היעד לטיפול', 'ימי חריגה עד העברה להנהלה'] },
+];
+const PUBLIC_SEC = { title: 'טופס לתושבים (חדש)', items: ['טופס באתר המועצה, בלי כניסה למערכת, נוח גם מהטלפון', 'כל פנייה מהטופס נכנסת ישר למוקד, עם התראה למוקדנים'] };
+const ask = (question: string, options: string[], multi = false) => use('ask_question', { question, options, multi });
+
+const newApp: Scenario = {
+  match: (t) => t.includes('הקשר עם התושבים'),
+  steps: [async () => [say('נשמע כמו מערכת מוקד ופניות. כמה שאלות קצרות לפני שאני מסכם.'), ask('מי קולט את הפניות מהתושבים?', ['מוקד טלפוני של המועצה', 'מזכירויות היישובים', 'המחלקות עצמן'], true)]],
+  then: {
+    match: () => true,
+    steps: [async () => [ask('אילו מחלקות מטפלות בפניות?', ['אחזקה ותשתיות', 'איכות הסביבה', 'חינוך', 'רווחה', 'גבייה'], true)]],
+    then: {
+      match: () => true,
+      steps: [async () => [ask('מה קורה כשמגיעה פנייה דחופה, או סכנה בטיחותית?', ['התראה מיידית למנהל המחלקה', 'מעבירים ישר להנהלה', 'מטפלים לפי התור הרגיל'])]],
+      then: {
+        match: () => true,
+        steps: [async () => [ask('תוך כמה זמן צריך לטפל בפנייה רגילה?', ['3 ימים', '5 ימים', 'שבוע'])]],
+        then: {
+          match: () => true,
+          steps: [async () => [say('תודה. זה האפיון, לפני שאני בונה:'), use('present_spec', { title: 'פניות תושבים, מועצה אזורית עמק יזרעאל', sections: SPEC_BASE })]],
+          then: {
+            match: () => true,
+            steps: [async () => [say('הוספתי טופס לתושבים. זה האפיון המעודכן:'), use('present_spec', { title: 'פניות תושבים, מועצה אזורית עמק יזרעאל', sections: [...SPEC_BASE.slice(0, 4), PUBLIC_SEC, SPEC_BASE[4]] })]],
+            then: {
+              match: () => true,
+              steps: [
+                async () => [use('write_file', { path: 'app.json', content: appFile('app.json') })],
+                async () => [use('write_file', { path: 'server.js', content: appFile('server.js') })],
+                async () => [use('write_file', { path: 'ui/index.jsx', content: appFile('ui/index.jsx') })],
+                async () => [use('write_file', { path: 'seed.json', content: appFile('seed.json') })],
+                async () => [use('publish_version', { note: 'גרסה ראשונה, מהאפיון שאושר', slug: 'moked' })],
+                async () => [say('האפליקציה מוכנה בסביבת הבדיקה, עם היישובים והמחלקות. אפשר להיכנס ולנסות.')],
+              ],
+            },
+          },
+        },
+      },
+    },
+  },
+};
+
+const botSetup: Scenario = {
+  match: (t) => t.includes('לעזור למוקד'),
+  steps: [
+    async () => [say('הבנתי. אני שומר את ההגדרות.'), use('set_bot_profile', {
+      goals: 'לעזור למוקד לקלוט פנייה של תושב מתוך שיחה: לזהות יישוב, תחום ודחיפות, לבדוק שאין כבר פנייה פתוחה על אותו מקום, ולפתוח פנייה חדשה',
+      behavior: 'קצר ולעניין. לפני שפותחים פנייה, לסכם אותה במשפט אחד',
+      read_only: false,
+      suggestions: ['תושב מנהלל מדווח על פנס כבוי', 'יש פניות פתוחות בכפר יהושע?'],
+    })],
+    async () => [say('מוכן. המוקדנים יראו את הבוט בחלון העוזר, והוא יפעל בהרשאות של מי שמדבר איתו.')],
+  ],
+};
+
+const SCENARIOS = [newApp, botSetup, intake, morning, readOnly, change];
 
 setAssistantModel({
   name: 'scripted',

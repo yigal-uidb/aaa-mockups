@@ -14,34 +14,24 @@ type Focus = { t: number; x: number; y: number; s: number };
 type Clip = { src: string; dur: number; focus: Focus[] };
 
 /* ---------------------------------------------------------------- clips and where to look in them */
+// A segment is a stretch of a recording (seconds from..to); focus times are in the recording's own seconds.
+type Seg = { src: string; from: number; to: number; focus: Focus[] };
 const F = (t: number, x: number, y: number, s: number): Focus => ({ t, x, y, s });
-const CLIPS: Record<string, Clip> = {
-  home: { src: 'home', dur: 9.97, focus: [F(0, .5, .5, 1.05), F(2.5, .62, .25, 1.45), F(5.5, .62, .25, 1.45), F(7.5, .5, .4, 1.1)] },
-  flow: { src: 'flow', dur: 22.7, focus: [F(0, .5, .33, 1.25), F(1.5, .62, .28, 1.75), F(7, .45, .28, 1.75), F(12, .32, .28, 1.75), F(15, .5, .58, 1.6), F(21, .4, .55, 1.6)] },
-  requests: { src: 'requests', dur: 12.8, focus: [F(0, .5, .2, 1.45), F(4, .5, .2, 1.45), F(6.5, .5, .55, 1.2), F(12, .5, .55, 1.2)] },
-  intake: { src: 'intake', dur: 27.0, focus: [F(0, .5, .5, 1.05), F(1.8, .15, .6, 1.85), F(20.5, .15, .6, 1.85), F(22, .38, .5, 1.3), F(27, .38, .5, 1.3)] },
-  manager: { src: 'manager', dur: 26.8, focus: [F(0, .2, .12, 1.7), F(4, .2, .12, 1.7), F(6.5, .4, .5, 1.25), F(10.5, .4, .5, 1.25), F(12, .72, .3, 1.5), F(18, .72, .3, 1.5), F(20, .45, .5, 1.1), F(26, .45, .5, 1.25)] },
-  morning: { src: 'morning', dur: 29.3, focus: [F(0, .5, .5, 1.05), F(2, .15, .6, 1.85), F(29, .15, .6, 1.85)] },
-  close: { src: 'close', dur: 14.3, focus: [F(0, .45, .3, 1.5), F(3, .45, .3, 1.5), F(4.5, .5, .45, 1.6), F(14, .5, .45, 1.6)] },
-  automation: { src: 'automation', dur: 8.0, focus: [F(0, .5, .45, 1.2), F(1.5, .55, .62, 1.8), F(4.5, .55, .62, 1.8), F(6.5, .6, .28, 1.6), F(8, .6, .28, 1.6)] },
-  overview: { src: 'overview', dur: 10.0, focus: [F(0, .45, .25, 1.4), F(3, .45, .3, 1.4), F(7, .4, .5, 1.25), F(10, .4, .5, 1.25)] },
-  change: { src: 'change', dur: 26.7, focus: [F(0, .5, .5, 1.05), F(1.8, .15, .6, 1.85), F(26.7, .15, .6, 1.85)] },
-  publish: { src: 'publish', dur: 13.6, focus: [F(0, .45, .4, 1.35), F(5, .45, .4, 1.35), F(7, .6, .3, 1.6), F(13.6, .6, .3, 1.6)] },
-};
-const SCENE_CLIPS: Record<string, string[]> = {
-  'clip:home': ['home'], 'clip:flow': ['flow'], 'clip:requests': ['requests'], 'clip:intake': ['intake'], 'clip:manager': ['manager'],
-  'clip:morning': ['morning'], 'clip:close': ['close', 'automation'], 'clip:overview': ['overview'], 'clip:change': ['change', 'publish'],
-};
-const CAPTIONS: Record<string, [string, string]> = {
-  'clip:home': ['AAA', 'המערכות של המועצה, במקום אחד'],
-  'clip:flow': ['תהליך העבודה', 'ניתוב, התראות ויעדי טיפול שהמועצה קובעת'],
-  'clip:requests': ['המוקד', 'כל הפניות, מה דחוף ומה חרג מהיעד'],
-  'clip:intake': ['בוט "קליטת פניות"', 'פותח פנייה מתוך שיחה, בהרשאות של המוקדנית'],
-  'clip:manager': ['מנהל המחלקה', 'התראה מיידית, לוח טיפול ומפת יישובים'],
-  'clip:morning': ['בוט אישי, לקריאה בלבד', 'מסכם, ולא יכול לשנות נתונים'],
-  'clip:close': ['סגירת פנייה', 'התושב מקבל עדכון במייל, אוטומטית'],
-  'clip:overview': ['תמונת מצב להנהלה', 'תחומים, יישובים, זמני טיפול ושביעות רצון'],
-  'clip:change': ['שינוי במערכת', 'בשיחה, בסביבת בדיקה, ובאישור מנהל נוסף'],
+const S = (src: string, from: number, to: number, ...focus: Focus[]): Seg => ({ src, from, to, focus });
+const SCENES: Record<string, { segs: Seg[]; cap?: [string, string]; maxRate?: number }> = {
+  describe: { segs: [S('build', 0, 16.8, F(0, .5, .3, 1.15), F(2.5, .5, .8, 1.9), F(16.8, .5, .8, 1.9))], cap: ['אפליקציה חדשה', 'מתארים לעוזר מה צריך, במילים פשוטות'] },
+  questions: { segs: [S('build', 16.6, 41.4, F(16.6, .5, .4, 1.8), F(22, .5, .5, 1.8), F(30, .5, .6, 1.8), F(36, .5, .68, 1.8), F(41.4, .5, .7, 1.8))], cap: ['שאלות מכוונות', 'העוזר מברר לפני שהוא בונה'] },
+  spec: { segs: [S('build', 41.4, 63.2, F(41.4, .5, .38, 1.55), F(45, .5, .55, 1.55), F(48.5, .5, .75, 1.8), F(53, .5, .75, 1.8), F(56, .5, .6, 1.55), F(61.5, .5, .74, 1.6), F(63.2, .5, .74, 1.6))], cap: ['אפיון לאישור', 'תיקון בשיחה, ואישור לפני בנייה'] },
+  building: { segs: [S('build', 63, 71.6, F(63, .5, .55, 1.7), F(67.5, .5, .5, 1.7), F(71.6, .5, .5, 1.7))], cap: ['הבנייה', 'נתונים, הרשאות, לוגיקה ומסכים'] },
+  tour: { segs: [S('tour', 0.5, 26, F(0, .45, .3, 1.3), F(3.5, .45, .3, 1.3), F(5, .45, .5, 1.1), F(10, .45, .5, 1.1), F(11.5, .5, .3, 1.6), F(17, .4, .3, 1.6), F(19, .5, .55, 1.6), F(26, .45, .55, 1.6))], cap: ['האפליקציה שנבנתה', 'מסכים, מפה, תהליך והגדרות'] },
+  viewas: { segs: [S('viewas', 0.5, 15.8, F(0, .45, .3, 1.2), F(1.5, .2, .12, 1.8), F(4.5, .2, .12, 1.8), F(6, .5, .35, 1.2), F(15.8, .5, .35, 1.2))], cap: ['צפייה בתור', 'רואים את המערכת בעיני כל תפקיד'] },
+  bot: { segs: [S('bot', 0.5, 35.2, F(0, .5, .5, 1.05), F(2, .15, .55, 1.85), F(35.2, .15, .6, 1.85))], cap: ['בוט חדש', 'מוגדר בשיחה, ופתוח רק למוקד'] },
+  golive: { segs: [S('guided', 0.5, 16.5, F(0, .55, .2, 1.9), F(8, .55, .2, 1.9), F(10, .55, .22, 1.9), F(16.5, .55, .26, 1.9)), S('approve', 0.5, 10, F(0, .55, .2, 1.9), F(10, .55, .2, 1.9))], cap: ['בדיקה מונחית ואישור', 'עולים לאוויר רק כשמנהל נוסף מאשר'] },
+  change: { segs: [S('change', 1.5, 26.7, F(0, .5, .5, 1.05), F(2.5, .15, .6, 1.85), F(26.7, .15, .6, 1.85))], cap: ['שינוי במערכת', 'בקשה בשיחה, גרסה חדשה, אישור'] },
+  'r-intake': { segs: [S('intake', 8.5, 27, F(8.5, .15, .6, 1.85), F(20.5, .15, .6, 1.85), F(22, .38, .5, 1.3), F(27, .38, .5, 1.3))], cap: ['בוט קליטת הפניות', 'פנייה נפתחת מתוך שיחה'], maxRate: 2.4 },
+  'r-manager': { segs: [S('manager', 0, 4.5, F(0, .2, .12, 1.7), F(4.5, .2, .12, 1.7)), S('manager', 11.5, 19, F(11.5, .72, .3, 1.5), F(19, .72, .3, 1.5)), S('manager', 20.5, 26.8, F(20.5, .45, .5, 1.1), F(26.8, .45, .5, 1.2)), S('morning', 13, 21, F(13, .15, .6, 1.85), F(21, .15, .62, 1.85)), S('morning', 24.5, 29.3, F(24.5, .15, .62, 1.85), F(29.3, .15, .62, 1.85))], cap: ['מנהל המחלקה', 'התראות, לוח טיפול, מפה ובוט אישי'], maxRate: 2.6 },
+  'r-close': { segs: [S('close', 3.5, 14.3, F(3.5, .45, .3, 1.5), F(4.5, .5, .45, 1.6), F(14.3, .5, .45, 1.6)), S('automation', 1, 5.5, F(1, .55, .62, 1.8), F(5.5, .55, .62, 1.8))], cap: ['עדכון לתושב', 'מייל אוטומטי בסגירת הפנייה'], maxRate: 2.6 },
+  'r-overview': { segs: [S('overview', 0, 10, F(0, .45, .25, 1.4), F(3, .45, .3, 1.4), F(7, .4, .5, 1.25), F(10, .4, .5, 1.25))], cap: ['תמונת מצב להנהלה', 'תחומים, יישובים, זמני טיפול ושביעות רצון'], maxRate: 2.2 },
 };
 
 /* ---------------------------------------------------------------- shared bits */
@@ -70,18 +60,18 @@ function focusAt(focus: Focus[], t: number): Focus {
   }
   return focus[focus.length - 1];
 }
-const Zoomed: React.FC<{ clip: Clip; rate: number; frames: number; freeze?: boolean }> = ({ clip, rate, frames, freeze }) => {
+const Zoomed: React.FC<{ seg: Seg; rate: number; freeze?: boolean }> = ({ seg, rate, freeze }) => {
   const frame = useCurrentFrame();
-  const t = freeze ? clip.dur - 0.1 : Math.min(clip.dur, (frame / 30) * rate);
-  const f = focusAt(clip.focus, t);
+  const t = freeze ? seg.to : Math.min(seg.to, seg.from + (frame / 30) * rate);
+  const f = focusAt(seg.focus, t);
   const s = f.s;
   const cx = Math.min(Math.max(f.x * W, W / (2 * s)), W - W / (2 * s));
   const cy = Math.min(Math.max(f.y * H, H / (2 * s)), H - H / (2 * s));
-  const video = <OffthreadVideo src={staticFile(`clips/${clip.src}.mp4`)} playbackRate={rate} muted style={{ width: W, height: H }} />;
+  const video = <OffthreadVideo src={staticFile(`clips/${seg.src}.mp4`)} startFrom={Math.round(seg.from * 30)} playbackRate={rate} muted style={{ width: W, height: H }} />;
   return (
     <AbsoluteFill style={{ overflow: 'hidden', background: '#F4F6FA' }}>
       <div style={{ position: 'absolute', left: 0, top: 0, width: W, height: H, transformOrigin: '0 0', transform: `translate(${W / 2}px,${H / 2}px) scale(${s}) translate(${-cx}px,${-cy}px)` }}>
-        {freeze ? <Freeze frame={Math.max(0, Math.floor(((clip.dur - 0.15) * 30) / rate))}>{video}</Freeze> : video}
+        {freeze ? <Freeze frame={Math.max(0, Math.floor(((seg.to - seg.from - 0.15) * 30) / rate))}>{video}</Freeze> : video}
       </div>
     </AbsoluteFill>
   );
@@ -101,25 +91,22 @@ const Caption: React.FC<{ title: string; sub: string }> = ({ title, sub }) => {
 };
 
 const ClipScene: React.FC<{ scene: Scene }> = ({ scene }) => {
-  const names = SCENE_CLIPS[scene.visual];
-  const clips = names.map((n) => CLIPS[n]);
-  const total = clips.reduce((a, c) => a + c.dur, 0);
-  const sceneSec = scene.frames / 30;
-  const rate = Math.min(2, Math.max(1, total / sceneSec));
+  const def = SCENES[scene.visual];
+  const total = def.segs.reduce((a, g) => a + (g.to - g.from), 0);
+  const rate = Math.min(def.maxRate ?? 2, Math.max(1, total / (scene.frames / 30)));
   let at = 0;
-  const parts = clips.map((c, i) => {
-    const len = Math.round((c.dur / rate) * 30);
+  const parts = def.segs.map((g, i) => {
+    const len = Math.round(((g.to - g.from) / rate) * 30);
     const from = at;
     at += len;
-    return <Sequence key={i} from={from} durationInFrames={len}><Zoomed clip={c} rate={rate} frames={len} /></Sequence>;
+    return <Sequence key={i} from={from} durationInFrames={len}><Zoomed seg={g} rate={rate} /></Sequence>;
   });
-  const last = clips[clips.length - 1];
-  const cap = CAPTIONS[scene.visual];
+  const last = def.segs[def.segs.length - 1];
   return (
     <AbsoluteFill>
       {parts}
-      {at < scene.frames ? <Sequence from={at}><Zoomed clip={last} rate={rate} frames={scene.frames - at} freeze /></Sequence> : null}
-      {cap ? <Caption title={cap[0]} sub={cap[1]} /> : null}
+      {at < scene.frames ? <Sequence from={at}><Zoomed seg={last} rate={rate} freeze /></Sequence> : null}
+      {def.cap ? <Caption title={def.cap[0]} sub={def.cap[1]} /> : null}
     </AbsoluteFill>
   );
 };
@@ -192,7 +179,7 @@ const Problem: React.FC<{ scene: Scene }> = ({ scene }) => {
 /* the phone: the public form as a resident sees it */
 const PublicScene: React.FC<{ scene: Scene }> = ({ scene }) => {
   const f = useCurrentFrame();
-  const rate = Math.min(2, Math.max(1, 22.3 / (scene.frames / 30)));
+  const rate = Math.min(2.6, Math.max(1, 18 / (scene.frames / 30)));
   return (
     <AbsoluteFill style={{ fontFamily: FONT, direction: 'rtl' }}>
       <Backdrop />
@@ -203,7 +190,7 @@ const PublicScene: React.FC<{ scene: Scene }> = ({ scene }) => {
       </div>
       <div style={{ position: 'absolute', left: 300, top: 60, width: 470, height: 960, borderRadius: 64, background: '#0E1230', padding: 20, boxShadow: '0 40px 90px rgba(10,14,40,.35)', opacity: fadeIn(f, 0, 10), transform: `translateY(${rise(f, 0, 60)}px)` }}>
         <div style={{ width: '100%', height: '100%', borderRadius: 46, overflow: 'hidden', background: '#fff', position: 'relative' }}>
-          <OffthreadVideo src={staticFile('clips/public.mp4')} playbackRate={rate} muted style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }} />
+          <OffthreadVideo src={staticFile('clips/public.mp4')} startFrom={130} playbackRate={rate} muted style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }} />
         </div>
       </div>
     </AbsoluteFill>
@@ -213,9 +200,9 @@ const PublicScene: React.FC<{ scene: Scene }> = ({ scene }) => {
 /* Claude, connected to AAA over MCP */
 const ClaudeScene: React.FC<{ scene: Scene }> = ({ scene }) => {
   const f = useCurrentFrame();
-  const typed = 'כמה פניות פתוחות יש בגבת, ומה הכי דחוף?';
+  const typed = 'תבקש מהעוזר של AAA להוסיף למערכת הפניות סיכום שבועי לרכזי היישובים';
   const n = Math.round(interpolate(f, [20, 95], [0, typed.length], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }));
-  const answer = ['בגבת יש 3 פניות פתוחות, כולן דחופות:', '• מזגן לא עובד בגן הילדים · יעד מחר', '• מתקן משחקים פגום · בטיפול, יעד מחר', '• בקשה לסיוע לקשיש בודד · יעד 26.11', 'הכי דחוף: הגן ומתקן המשחקים.'];
+  const answer = ['העוזר של AAA הכין אפיון לשינוי:', '• שדה מייל לרכז או לרכזת בכל יישוב', '• כל יום ראשון ב-08:00, מייל עם הפניות הפתוחות ביישוב', '• יישוב בלי פניות פתוחות לא מקבל מייל', 'לאשר, כדי שתיבנה גרסה חדשה בסביבת הבדיקה?'];
   const tool = (label: string, at: number) => (
     <div style={{ opacity: fadeIn(f, at, 10), display: 'flex', alignItems: 'center', gap: 12, fontSize: 24, color: '#6B5E4E', background: '#F3EEE6', border: '1px solid #E4DACB', borderRadius: 12, padding: '10px 16px', width: 'fit-content', marginTop: 12 }}>
       <span style={{ width: 22, height: 22, borderRadius: 6, background: NAVY, color: '#fff', fontSize: 11, fontWeight: 800, display: 'grid', placeItems: 'center', direction: 'ltr' }}>AAA</span>{label}{f > at + 30 ? <span style={{ color: GREEN }}> ✓</span> : <span> …</span>}
@@ -243,7 +230,20 @@ const ClaudeScene: React.FC<{ scene: Scene }> = ({ scene }) => {
   );
 };
 
-const VALUES = ['פחות פניות שנופלות בין הכיסאות', 'זמני טיפול גלויים לכולם', 'תושבים מעודכנים, אוטומטית', 'מערכת שהמועצה מתאימה לעצמה'];
+const LaterCard: React.FC = () => {
+  const f = useCurrentFrame();
+  return (
+    <AbsoluteFill style={{ fontFamily: FONT, direction: 'rtl' }}>
+      <Backdrop dark />
+      <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center', color: '#fff', textAlign: 'center' }}>
+        <div style={{ fontSize: 34, fontWeight: 600, color: GOLD, opacity: fadeIn(f, 4) }}>והתוצאה</div>
+        <div style={{ fontSize: 92, fontWeight: 800, marginTop: 12, opacity: fadeIn(f, 10), transform: `translateY(${rise(f, 10)}px)` }}>אחרי כמה שבועות של עבודה</div>
+      </AbsoluteFill>
+    </AbsoluteFill>
+  );
+};
+
+const VALUES = ['מערכת שנבנית בשיחה, בלי פרויקט פיתוח', 'שינויים בגרסאות, עם אישור לפני עלייה לאוויר', 'הרשאות ובקרה על כל פעולה, גם של הבוטים', 'פחות פניות שנופלות בין הכיסאות'];
 const CloseCard: React.FC = () => {
   const f = useCurrentFrame();
   return (
@@ -295,7 +295,7 @@ const SceneView: React.FC<{ scene: Scene }> = ({ scene }) => {
   const f = useCurrentFrame();
   const o = interpolate(f, [0, 12], [0, 1], { extrapolateRight: 'clamp' });
   const v = scene.visual;
-  const body = v === 'card-open' ? <OpenCard /> : v === 'card-close' ? <CloseCard /> : v === 'problem' ? <Problem scene={scene} /> : v === 'claude' ? <ClaudeScene scene={scene} /> : v === 'clip:public' ? <PublicScene scene={scene} /> : <ClipScene scene={scene} />;
+  const body = v === 'card-open' ? <OpenCard /> : v === 'card-close' ? <CloseCard /> : v === 'problem' ? <Problem scene={scene} /> : v === 'claude' ? <ClaudeScene scene={scene} /> : v === 'public' ? <PublicScene scene={scene} /> : v === 'card-later' ? <LaterCard /> : <ClipScene scene={scene} />;
   return <AbsoluteFill style={{ opacity: o }}>{body}</AbsoluteFill>;
 };
 

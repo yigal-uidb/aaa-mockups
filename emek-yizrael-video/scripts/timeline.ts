@@ -7,14 +7,14 @@ const FPS = 30;
 const scenes: { id: string; visual: string; text: string }[] = JSON.parse(readFileSync('script/scenes.json', 'utf8'));
 const probe = (f: string) => Number(execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', f]).toString());
 // time on screen around the narration: a lead-in before the voice and a tail after it
-const LEAD: Record<string, number> = { 'card-open': 1.2, 'card-close': 0.6 };
-const TAIL: Record<string, number> = { 'card-close': 3.5, 'clip:intake': 1.4, 'clip:change': 1.2, claude: 1.2 };
+const LEAD: Record<string, number> = { 'card-open': 1.2, 'card-close': 0.6, 'card-later': 0.2 };
+const TAIL: Record<string, number> = { 'card-close': 3.5, 'card-later': 2.3, building: 1.5, questions: 0.8, spec: 1.0, bot: 1.2, golive: 1.2, claude: 1.4, 'r-overview': 1.2, public: 1.6 };
 let t = 0;
 const out = [];
 for (const s of scenes) {
   const audio = `public/audio/${s.id}.mp3`;
   const hasAudio = existsSync(audio);
-  const voice = hasAudio ? probe(audio) : s.text.split(/\s+/).length / 2.25;
+  const voice = !s.text.trim() ? 0 : hasAudio ? probe(audio) : s.text.split(/\s+/).length / 2.25;
   const lead = LEAD[s.visual] ?? 0.5;
   const tail = TAIL[s.visual] ?? 0.7;
   const dur = lead + voice + tail;
@@ -36,6 +36,7 @@ export function chunks(text: string): string[] {
 }
 let n = 0; const srt: string[] = [];
 for (const s of out) {
+  if (!s.text.trim()) continue;
   const lines = chunks(s.text); const total = lines.reduce((a, l) => a + l.length, 0);
   let at = s.voiceFrom / FPS;
   for (const l of lines) { const d = (l.length / total) * (s.voiceFrames / FPS); srt.push(`${++n}\n${ts(at)} --> ${ts(at + d)}\n${l}\n`); at += d; }

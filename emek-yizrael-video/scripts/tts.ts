@@ -15,6 +15,7 @@ const hashes: Record<string, string> = existsSync('audio/hashes.json') ? JSON.pa
 const only = process.argv.slice(2);
 for (const s of scenes) {
   const text = s.tts ?? s.text;
+  if (!text.trim()) continue;
   const h = createHash('sha1').update(VOICE + MODEL + TEMPO + text).digest('hex');
   const out = `public/audio/${s.id}.mp3`;
   if (!only.length && hashes[s.id] === h && existsSync(out)) continue;
