@@ -8,7 +8,7 @@ const scenes: { id: string; visual: string; text: string }[] = JSON.parse(readFi
 const probe = (f: string) => Number(execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', f]).toString());
 // time on screen around the narration: a lead-in before the voice and a tail after it
 const LEAD: Record<string, number> = { 'card-open': 1.2, 'card-close': 0.6, 'card-later': 0.2 };
-const TAIL: Record<string, number> = { 'card-close': 3.5, 'card-later': 2.3, building: 1.5, questions: 0.8, spec: 1.0, bot: 1.2, golive: 1.2, claude: 1.4, 'r-overview': 2.5, public: 3.2, 'r-close': 3.5 };
+const TAIL: Record<string, number> = { 'card-close': 3.5, 'card-later': 2.3, building: 1.5, questions: 0.8, spec: 1.0, bot: 1.2, golive: 1.2, claude: 1.4, 'r-overview': 2.5, public: 3.2, 'r-close': 3.5, 'r-manager': 1.8 };
 let t = 0;
 const out = [];
 for (const s of scenes) {

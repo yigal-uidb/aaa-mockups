@@ -17,7 +17,7 @@ type Clip = { src: string; dur: number; focus: Focus[] };
 
 /* ---------------------------------------------------------------- clips and where to look in them */
 // A segment is a stretch of a recording (seconds from..to); focus times are in the recording's own seconds.
-type Seg = { src: string; from: number; to: number; focus: Focus[] };
+type Seg = { src: string; from: number; to: number; focus: Focus[]; rate?: number };
 const F = (t: number, x: number, y: number, s: number): Focus => ({ t, x, y, s });
 const S = (src: string, from: number, to: number, ...focus: Focus[]): Seg => ({ src, from, to, focus });
 const SCENES: Record<string, { segs: Seg[]; cap?: [string, string]; maxRate?: number }> = {
@@ -31,7 +31,7 @@ const SCENES: Record<string, { segs: Seg[]; cap?: [string, string]; maxRate?: nu
   golive: { segs: [S('guided', 0.3, 16.5, F(0, .55, .4, 1.1), F(16.5, .55, .4, 1.1)), S('approve', 0.3, 10, F(0, .55, .35, 1.15), F(10, .55, .35, 1.15))], cap: ['בדיקה מונחית ואישור', 'עולים לאוויר רק כשמנהל נוסף מאשר'] },
   change: { segs: [S('change', 1, 24, F(1, .5, .5, 1), F(2.5, .3, .55, 1.2), F(24, .3, .55, 1.2))], cap: ['שינוי במערכת', 'בקשה בשיחה, גרסה חדשה, אישור'] },
   'r-intake': { segs: [S('intake', 8, 25.4, F(8, .3, .55, 1.2), F(20.6, .3, .55, 1.2), F(22, .5, .5, 1), F(25.4, .5, .5, 1))], cap: ['בוט קליטת הפניות', 'פנייה נפתחת מתוך שיחה'], maxRate: 2.4 },
-  'r-manager': { segs: [S('manager', 0.3, 6.5, F(0, .3, .2, 1.2), F(6.5, .3, .2, 1.2)), S('manager', 8, 20.5, F(8, .5, .5, 1), F(20.5, .5, .5, 1)), S('manager', 21.2, 28.3, F(21.2, .5, .5, 1), F(28.3, .5, .5, 1)), S('morning', 15.8, 22, F(15.8, .3, .55, 1.2), F(22, .3, .55, 1.2)), S('morning', 25, 28.8, F(25, .3, .55, 1.2), F(28.8, .3, .55, 1.2))], cap: ['מנהל המחלקה', 'התראות, לוח טיפול, מפה ובוט אישי'], maxRate: 2.6 },
+  'r-manager': { segs: [S('manager', 0.5, 3.5, F(0, .3, .2, 1.2), F(3.5, .3, .2, 1.2)), S('manager', 13, 18.5, F(13, .5, .5, 1), F(18.5, .5, .5, 1)), S('manager', 22, 24.5, F(22, .5, .5, 1), F(24.5, .5, .5, 1)), S('morning', 15.8, 21.5, F(15.8, .3, .55, 1.2), F(21.5, .3, .55, 1.2)), S('morning', 25.3, 28.8, F(25.3, .3, .55, 1.2), F(28.8, .3, .55, 1.2))].map((g, i) => ({ ...g, rate: i < 3 ? 2 : 1.75 })), cap: ['מנהל המחלקה', 'התראות, לוח טיפול, מפה ובוט אישי'], maxRate: 2.6 },
   'r-close': { segs: [S('close', 4, 13.2, F(0, .5, .5, 1.1), F(13.2, .5, .5, 1.1)), S('automation', 0.5, 4.5, F(0, .5, .6, 1.15), F(5.6, .5, .6, 1.15))], cap: ['עדכון לתושב', 'מייל אוטומטי בסגירת הפנייה'], maxRate: 2.6 },
   'r-overview': { segs: [S('overview', 1, 9.5, F(1, .5, .5, 1), F(9.5, .5, .5, 1))], cap: ['תמונת מצב להנהלה', 'תחומים, יישובים, זמני טיפול ושביעות רצון'], maxRate: 2.2 },
 };
@@ -99,16 +99,17 @@ const ClipScene: React.FC<{ scene: Scene }> = ({ scene }) => {
   const rate = Math.min(def.maxRate ?? 2, Math.max(1, total / (scene.frames / 30)));
   let at = 0;
   const parts = def.segs.map((g, i) => {
-    const len = Math.round(((g.to - g.from) / rate) * 30);
+    const r = g.rate ?? rate;
+    const len = Math.round(((g.to - g.from) / r) * 30);
     const from = at;
     at += len;
-    return <Sequence key={i} from={from} durationInFrames={len}><Zoomed seg={g} rate={rate} /></Sequence>;
+    return <Sequence key={i} from={from} durationInFrames={len}><Zoomed seg={g} rate={r} /></Sequence>;
   });
   const last = def.segs[def.segs.length - 1];
   return (
     <AbsoluteFill>
       {parts}
-      {at < scene.frames ? <Sequence from={at}><Zoomed seg={last} rate={rate} freeze /></Sequence> : null}
+      {at < scene.frames ? <Sequence from={at}><Zoomed seg={last} rate={last.rate ?? rate} freeze /></Sequence> : null}
       {def.cap ? <Caption title={def.cap[0]} sub={def.cap[1]} /> : null}
     </AbsoluteFill>
   );
